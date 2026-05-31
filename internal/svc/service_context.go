@@ -8,6 +8,8 @@ import (
 	"github.com/luyb177/silent-sign-backend/common/database"
 	"github.com/luyb177/silent-sign-backend/common/mail"
 	"github.com/luyb177/silent-sign-backend/internal/config"
+	"github.com/luyb177/silent-sign-backend/internal/pkg/email"
+	"github.com/luyb177/silent-sign-backend/internal/repo"
 )
 
 type ServiceContext struct {
@@ -15,6 +17,8 @@ type ServiceContext struct {
 	Mailer      *mail.Mailer
 	RedisClient *cache.RedisClient
 	MySQLClient *database.MySQLClient
+	EmailSender email.EmailSender
+	Repos       *repo.Repositories
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -24,6 +28,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		SMTPHost: c.EmailConf.SMTPHost,
 		SMTPPort: c.EmailConf.SMTPPort,
 	})
+
+	emailSender := email.NewEmailSender(m)
 
 	rc, err := cache.NewRedisClient(c.RedisConf.Addr, c.RedisConf.Password, c.RedisConf.DB)
 	if err != nil {
@@ -40,5 +46,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Mailer:      m,
 		RedisClient: rc,
 		MySQLClient: mc,
+		EmailSender: emailSender,
+		Repos:       repo.NewRepositories(rc.Client, mc.DB),
 	}
 }

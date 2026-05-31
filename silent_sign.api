@@ -11,11 +11,7 @@ info (
 // Common types and definitions
 // ──────────────────────────────────────────────
 type (
-	Response {
-		Code int
-		Msg  string
-		Data interface{}
-	}
+	Response  {}
 )
 
 // ──────────────────────────────────────────────

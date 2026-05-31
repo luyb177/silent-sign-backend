@@ -15,12 +15,12 @@ type Body struct {
 	Data interface{} `json:"data"`
 }
 
-type EmptyData struct{}
-
 // OkCtx writes a successful response with code=0, msg="ok".
 func OkCtx(ctx context.Context, w http.ResponseWriter, data interface{}) {
 	httpx.OkJsonCtx(ctx, w, &Body{Code: 0, Msg: "ok", Data: data})
 }
+
+type EmptyData struct{}
 
 // ErrorCtx writes an error response. If err is an *AppError, its Code and Msg
 // are extracted; otherwise it falls back to CodeInternalError.

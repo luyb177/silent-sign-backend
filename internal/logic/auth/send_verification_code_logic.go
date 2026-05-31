@@ -5,7 +5,13 @@ package auth
 
 import (
 	"context"
+	"strings"
 
+	"github.com/luyb177/silent-sign-backend/common/errorx"
+	"github.com/luyb177/silent-sign-backend/internal/constvar"
+	"github.com/luyb177/silent-sign-backend/internal/pkg/code"
+	"github.com/luyb177/silent-sign-backend/internal/pkg/email"
+	"github.com/luyb177/silent-sign-backend/internal/repo/verify"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 	"github.com/luyb177/silent-sign-backend/internal/types"
 
@@ -28,7 +34,65 @@ func NewSendVerificationCodeLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *SendVerificationCodeLogic) SendVerificationCode(req *types.SendVerificationCodeReq) (resp *types.Response, err error) {
-	// todo: add your logic here and delete this line
+	l.Info("Auth SendVerificationCode")
 
-	return
+	if !validVerifyPurpose(constvar.VerificationPurpose(req.Purpose)) {
+		return nil, errorx.WrapBadRequest("无效的验证码用途", nil)
+	}
+
+	switch constvar.VerificationChannel(req.Channel) {
+	case constvar.ChannelEmail:
+		return l.sendVerificationEmailCode(req.Target, constvar.VerificationPurpose(req.Purpose))
+	default:
+		return nil, errorx.WrapBadRequest("无效的验证码渠道", nil)
+	}
+}
+
+func (l *SendVerificationCodeLogic) sendVerificationEmailCode(target string, purpose constvar.VerificationPurpose) (*types.Response, error) {
+	if strings.TrimSpace(target) == "" {
+		return nil, errorx.WrapBadRequest("邮箱地址不能为空", nil)
+	}
+
+	if len(target) > 254 {
+		return nil, errorx.WrapBadRequest("邮箱地址过长", nil)
+	}
+
+	target = email.CanonicalEmail(target)
+
+	if !email.IsValidEmail(target) {
+		return nil, errorx.WrapBadRequest("无效的邮箱地址", nil)
+	}
+
+	// 生成 6 位验证码
+	emailCode := code.EmailCode()
+
+	// 存入 Redis
+	meta := &verify.Meta{
+		Target:  target,
+		Channel: constvar.ChannelEmail,
+		Purpose: purpose,
+	}
+	if err := l.svcCtx.Repos.Verify.SetCode(l.ctx, meta, emailCode, constvar.VerifyCodeExpire); err != nil {
+		l.Errorf("set verify code failed: %v", err)
+		return nil, errorx.WrapInternal("验证码存储失败", err)
+	}
+
+	// todo mq 发送邮件
+	go func() {
+		if err := l.svcCtx.EmailSender.SendVerifyCode(l.ctx, target, emailCode, int(constvar.VerifyCodeExpire.Minutes())); err != nil {
+			l.Errorf("send verify code email failed: %v", err)
+		}
+	}()
+
+	return &types.Response{}, nil
+}
+
+func validVerifyPurpose(purpose constvar.VerificationPurpose) bool {
+	switch purpose {
+	case constvar.PurposeRegistration,
+		constvar.PurposePasswordReset:
+		return true
+	default:
+		return false
+	}
 }

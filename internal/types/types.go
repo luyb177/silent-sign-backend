@@ -4,9 +4,6 @@
 package types
 
 type Response struct {
-	Code int
-	Msg  string
-	Data interface{}
 }
 
 type SendVerificationCodeReq struct {

@@ -1,0 +1,42 @@
+syntax = "v1"
+
+info (
+	title:   "silent-sign API"
+	desc:    "无声之韵智能手语双向翻译系统 API"
+	author:  "silent-sign team"
+	version: "1.0"
+)
+
+// ──────────────────────────────────────────────
+// Common types and definitions
+// ──────────────────────────────────────────────
+type (
+	Response {
+		Code int
+		Msg  string
+		Data interface{}
+	}
+)
+
+// ──────────────────────────────────────────────
+// Auth (no JWT required) todo
+// ──────────────────────────────────────────────
+type (
+	SendVerificationCodeReq {
+		Target  string `json:"target"` // email or phone
+		Channel int32  `json:"channel"` // 1: email, 2: phone
+		Purpose int32  `json:"purpose"` // 1: registration, 2: password reset
+	}
+)
+
+@server (
+	prefix: /api/v1/auth
+	tags:   "认证模块"
+	group:  auth
+)
+service silent_sign {
+	@doc "发送验证码"
+	@handler SendVerificationCode
+	get /send_code (SendVerificationCodeReq) returns (Response)
+}
+

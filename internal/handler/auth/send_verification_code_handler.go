@@ -6,6 +6,8 @@ package auth
 import (
 	"net/http"
 
+	"github.com/luyb177/silent-sign-backend/common/errorx"
+	"github.com/luyb177/silent-sign-backend/common/respx"
 	"github.com/luyb177/silent-sign-backend/internal/logic/auth"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 	"github.com/luyb177/silent-sign-backend/internal/types"
@@ -17,16 +19,16 @@ func SendVerificationCodeHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.SendVerificationCodeReq
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			respx.ErrorCtx(r.Context(), w, errorx.WrapBadRequest("请求参数解析失败", err))
 			return
 		}
 
 		l := auth.NewSendVerificationCodeLogic(r.Context(), svcCtx)
 		resp, err := l.SendVerificationCode(&req)
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
-		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			respx.ErrorCtx(r.Context(), w, err)
+			return
 		}
+		respx.OkCtx(r.Context(), w, resp)
 	}
 }

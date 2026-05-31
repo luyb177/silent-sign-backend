@@ -3,6 +3,7 @@ package errorx
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 const (
@@ -37,6 +38,31 @@ const (
 	CodeTokenExpired = 180102 // Token过期
 )
 
+var codeToHTTPStatus = map[int]int{
+	CodeOK: http.StatusOK,
+
+	CodeBadRequest:      http.StatusBadRequest,
+	CodeUnauthorized:    http.StatusUnauthorized,
+	CodeForbidden:       http.StatusForbidden,
+	CodeNotFound:        http.StatusNotFound,
+	CodeConflict:        http.StatusConflict,
+	CodeUnprocessable:   http.StatusUnprocessableEntity,
+	CodeTooManyRequests: http.StatusTooManyRequests,
+
+	CodeInternalError:        http.StatusInternalServerError,
+	CodeNotImplemented:       http.StatusNotImplemented,
+	CodeUnavailable:          http.StatusServiceUnavailable,
+	CodeDatabaseQueryFailed:  http.StatusInternalServerError,
+	CodeDatabaseInsertFailed: http.StatusInternalServerError,
+	CodeDatabaseUpdateFailed: http.StatusInternalServerError,
+	CodeDatabaseDeleteFailed: http.StatusInternalServerError,
+	CodeDatabaseTxFailed:     http.StatusInternalServerError,
+	CodeRedisGetFailed:       http.StatusInternalServerError,
+	CodeRedisSetFailed:       http.StatusInternalServerError,
+	CodeTokenInvalid:         http.StatusUnauthorized,
+	CodeTokenExpired:         http.StatusUnauthorized,
+}
+
 type AppError struct {
 	Code  int
 	Msg   string
@@ -52,6 +78,13 @@ func (e *AppError) Error() string {
 
 func (e *AppError) Unwrap() error {
 	return e.cause
+}
+
+func (e *AppError) HTTPStatus() int {
+	if s, ok := codeToHTTPStatus[e.Code]; ok {
+		return s
+	}
+	return http.StatusInternalServerError
 }
 
 func New(code int, msg string) *AppError {

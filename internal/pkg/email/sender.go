@@ -18,6 +18,9 @@ type EmailSender interface {
 
 	// SendWelcomeEmail 发送欢迎邮件
 	SendWelcomeEmail(ctx context.Context, to, username string) error
+
+	// SendLoginNotification 发送登录通知邮件
+	SendLoginNotification(ctx context.Context, to, username, ip, location string) error
 }
 
 type DefaultEmailSender struct {
@@ -49,6 +52,18 @@ func (s *DefaultEmailSender) SendWelcomeEmail(ctx context.Context, to, username 
 	}
 
 	return s.renderAndSend(ctx, subject, welcomeTmpl, data, []string{to})
+}
+
+func (s *DefaultEmailSender) SendLoginNotification(ctx context.Context, to, username, ip, location string) error {
+	subject := "【Silent Sign】登录通知"
+	data := map[string]interface{}{
+		"Username": username,
+		"IP":       ip,
+		"Location": location,
+		"Now":      time.Now().Format(time.RFC3339),
+	}
+
+	return s.renderAndSend(ctx, subject, loginNotificationTmpl, data, []string{to})
 }
 
 // 内部渲染并发送

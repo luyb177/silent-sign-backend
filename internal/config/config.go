@@ -18,6 +18,12 @@ type Config struct {
 		SMTPPort int
 	}
 	IP2RegionConf IP2RegionConf
+	JWTConf       JWTConf
+}
+
+type JWTConf struct {
+	Secret  string
+	ExpireS int64 // 过期时间，单位：秒
 }
 
 type RedisConf struct {

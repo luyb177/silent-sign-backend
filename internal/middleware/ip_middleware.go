@@ -5,7 +5,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/base64"
 	"net"
 	"net/http"
 	"strings"
@@ -112,17 +111,12 @@ func parseIPRegion(region string) *types.IPLocation {
 	}
 
 	return &types.IPLocation{
-		Country:  encodeValue(clean(parts[0])),
-		Province: encodeValue(clean(parts[1])),
-		City:     encodeValue(clean(parts[2])),
-		ISP:      encodeValue(clean(parts[3])),
-		ISOCode:  encodeValue(clean(parts[4])),
+		Country:  clean(parts[0]),
+		Province: clean(parts[1]),
+		City:     clean(parts[2]),
+		ISP:      clean(parts[3]),
+		ISOCode:  clean(parts[4]),
 	}
-}
-
-// encodeValue 使用 base64 编码字符串
-func encodeValue(s string) string {
-	return base64.StdEncoding.EncodeToString([]byte(s))
 }
 
 // GetIPLocation 从 context 中获取 IP 地理位置信息，方便业务层调用

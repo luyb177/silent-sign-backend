@@ -4,8 +4,11 @@
 package svc
 
 import (
+	"time"
+
 	"github.com/luyb177/silent-sign-backend/common/cache"
 	"github.com/luyb177/silent-sign-backend/common/database"
+	"github.com/luyb177/silent-sign-backend/common/jwtx"
 	"github.com/luyb177/silent-sign-backend/common/mail"
 	"github.com/luyb177/silent-sign-backend/internal/config"
 	"github.com/luyb177/silent-sign-backend/internal/middleware"
@@ -22,6 +25,7 @@ type ServiceContext struct {
 	EmailSender  email.EmailSender
 	Repos        *repo.Repositories
 	IPMiddleware rest.Middleware
+	JWTHandler   jwtx.Handler
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -52,5 +56,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		EmailSender:  emailSender,
 		Repos:        repo.NewRepositories(rc.Client, mc.DB),
 		IPMiddleware: middleware.NewIPMiddleware(c.IP2RegionConf).Handle,
+		JWTHandler:   jwtx.NewHandler(c.JWTConf.Secret, time.Duration(c.JWTConf.ExpireS)*time.Second),
 	}
 }

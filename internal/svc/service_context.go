@@ -18,14 +18,15 @@ import (
 )
 
 type ServiceContext struct {
-	Config       config.Config
-	Mailer       *mail.Mailer
-	RedisClient  *cache.RedisClient
-	MySQLClient  *database.MySQLClient
-	EmailSender  email.EmailSender
-	Repos        *repo.Repositories
-	IPMiddleware rest.Middleware
-	JWTHandler   jwtx.Handler
+	Config        config.Config
+	Mailer        *mail.Mailer
+	RedisClient   *cache.RedisClient
+	MySQLClient   *database.MySQLClient
+	EmailSender   email.EmailSender
+	Repos         *repo.Repositories
+	JWTHandler    jwtx.Handler
+	IPMiddleware  rest.Middleware
+	JWTMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -48,14 +49,17 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
+	jwtHandler := jwtx.NewHandler(c.JWTConf.Secret, time.Duration(c.JWTConf.ExpireS)*time.Second)
+
 	return &ServiceContext{
-		Config:       c,
-		Mailer:       m,
-		RedisClient:  rc,
-		MySQLClient:  mc,
-		EmailSender:  emailSender,
-		Repos:        repo.NewRepositories(rc.Client, mc.DB),
-		IPMiddleware: middleware.NewIPMiddleware(c.IP2RegionConf).Handle,
-		JWTHandler:   jwtx.NewHandler(c.JWTConf.Secret, time.Duration(c.JWTConf.ExpireS)*time.Second),
+		Config:        c,
+		Mailer:        m,
+		RedisClient:   rc,
+		MySQLClient:   mc,
+		EmailSender:   emailSender,
+		Repos:         repo.NewRepositories(rc.Client, mc.DB),
+		JWTHandler:    jwtHandler,
+		IPMiddleware:  middleware.NewIPMiddleware(c.IP2RegionConf).Handle,
+		JWTMiddleware: middleware.NewJWTMiddleware(jwtHandler).Handle,
 	}
 }

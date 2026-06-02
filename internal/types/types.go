@@ -43,6 +43,11 @@ type SendVerificationCodeReq struct {
 	Purpose int32  `json:"purpose"` // 1: registration, 2: password reset
 }
 
+type UpdateUserInfoReq struct {
+	Username string `json:"username,omitempty"`
+	Avatar   string `json:"avatar,omitempty"`
+}
+
 type UserInfo struct {
 	UserID    uint64 `json:"user_id"`
 	Username  string `json:"username"`

@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	auth "github.com/luyb177/silent-sign-backend/internal/handler/auth"
+	user "github.com/luyb177/silent-sign-backend/internal/handler/user"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -38,5 +39,20 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/auth"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
+			[]rest.Route{
+				{
+					// 修改用户信息
+					Method:  http.MethodPut,
+					Path:    "/update_info",
+					Handler: user.UpdateUserInfoHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/user"),
 	)
 }

@@ -1,3 +1,6 @@
+// Code scaffolded by goctl. Safe to edit.
+// goctl 1.10.1
+
 package middleware
 
 import (
@@ -13,19 +16,19 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type AuthMiddleware struct {
+type JWTMiddleware struct {
 	handler jwtx.Handler
 	logx.Logger
 }
 
-func NewAuthMiddleware(handler jwtx.Handler) *AuthMiddleware {
-	return &AuthMiddleware{
+func NewJWTMiddleware(handler jwtx.Handler) *JWTMiddleware {
+	return &JWTMiddleware{
 		handler: handler,
-		Logger:  logx.WithContext(nil),
+		Logger:  logx.WithContext(context.Background()),
 	}
 }
 
-func (m *AuthMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
+func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := parseAuthorizationToken(r.Header)
 		if token == "" {

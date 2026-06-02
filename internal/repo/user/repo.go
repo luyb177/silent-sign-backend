@@ -11,6 +11,8 @@ import (
 type Repository interface {
 	Create(ctx context.Context, user *User, tx ...*gorm.DB) error
 	FindByEmail(ctx context.Context, email string, tx ...*gorm.DB) (*User, error)
+	FindByID(ctx context.Context, id uint64, tx ...*gorm.DB) (*User, error)
+	Update(ctx context.Context, id uint64, updates map[string]interface{}, tx ...*gorm.DB) error
 }
 
 type repo struct {
@@ -39,4 +41,20 @@ func (r *repo) FindByEmail(ctx context.Context, email string, tx ...*gorm.DB) (*
 		return nil, nil
 	}
 	return &u, err
+}
+
+func (r *repo) FindByID(ctx context.Context, id uint64, tx ...*gorm.DB) (*User, error) {
+	db := r.getDB(ctx, tx...)
+
+	var u User
+	err := db.Where("id = ?", id).First(&u).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &u, err
+}
+
+func (r *repo) Update(ctx context.Context, id uint64, updates map[string]interface{}, tx ...*gorm.DB) error {
+	db := r.getDB(ctx, tx...)
+	return db.Model(&User{}).Where("id = ?", id).Updates(updates).Error
 }

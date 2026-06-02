@@ -88,3 +88,26 @@ service silent_sign {
 	post /login (LoginReq) returns (LoginResp)
 }
 
+// ══════════════════════════════════════════════
+// User 需 JWT
+// ══════════════════════════════════════════════
+//request
+type (
+	UpdateUserInfoReq {
+		Username string `json:"username,omitempty"`
+		Avatar   string `json:"avatar,omitempty"`
+	}
+)
+
+@server (
+	prefix:     /api/v1/user
+	tags:       "用户模块"
+	group:      user
+	middleware: JWTMiddleware,IPMiddleware
+)
+service silent_sign {
+	@doc "修改用户信息"
+	@handler UpdateUserInfo
+	put /update_info (UpdateUserInfoReq) returns (Response)
+}
+

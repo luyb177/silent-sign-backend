@@ -17,10 +17,16 @@ type Config struct {
 		SMTPHost string
 		SMTPPort int
 	}
+	IP2RegionConf IP2RegionConf
 }
 
 type RedisConf struct {
 	Addr     string
 	Password string
 	DB       int
+}
+
+type IP2RegionConf struct {
+	V4 string
+	V6 string
 }

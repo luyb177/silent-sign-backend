@@ -3,6 +3,15 @@
 
 package types
 
+type IPLocation struct {
+	IP       string `json:"ip"`
+	Country  string `json:"country"`
+	Province string `json:"province"`
+	City     string `json:"city"`
+	ISP      string `json:"isp"`
+	ISOCode  string `json:"iso_code"`
+}
+
 type RegisterReq struct {
 	Target   string `json:"target"`   // email or phone
 	Channel  int32  `json:"channel"`  // 1: email, 2: phone

@@ -10,6 +10,19 @@ info (
 // ──────────────────────────────────────────────
 // Common types and definitions
 // ──────────────────────────────────────────────
+// model
+type (
+	IPLocation {
+		IP       string `json:"ip"`
+		Country  string `json:"country"`
+		Province string `json:"province"`
+		City     string `json:"city"`
+		ISP      string `json:"isp"`
+		ISOCode  string `json:"iso_code"`
+	}
+)
+
+// response
 type (
 	Response  {}
 )
@@ -17,6 +30,7 @@ type (
 // ──────────────────────────────────────────────
 // Auth (no JWT required) todo
 // ──────────────────────────────────────────────
+// request
 type (
 	SendVerificationCodeReq {
 		Target  string `json:"target"` // email or phone
@@ -24,17 +38,18 @@ type (
 		Purpose int32  `json:"purpose"` // 1: registration, 2: password reset
 	}
 	RegisterReq {
-		Target   string `json:"target"`   // email or phone
-		Channel  int32  `json:"channel"`  // 1: email, 2: phone
-		Code     string `json:"code"`     // 验证码
+		Target   string `json:"target"` // email or phone
+		Channel  int32  `json:"channel"` // 1: email, 2: phone
+		Code     string `json:"code"` // 验证码
 		Password string `json:"password"` // 密码
 	}
 )
 
 @server (
-	prefix: /api/v1/auth
-	tags:   "认证模块"
-	group:  auth
+	prefix:     /api/v1/auth
+	tags:       "认证模块"
+	group:      auth
+	middleware: IPMiddleware
 )
 service silent_sign {
 	@doc "发送验证码"

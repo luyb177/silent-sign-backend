@@ -2,6 +2,13 @@ package constvar
 
 import "time"
 
+// Context keys
+type contextKey string
+
+const (
+	IPLocationKey contextKey = "ip_location"
+)
+
 const (
 	ChannelEmail int32 = 1
 	ChannelPhone int32 = 2

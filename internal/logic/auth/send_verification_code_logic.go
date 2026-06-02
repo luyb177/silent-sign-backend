@@ -36,19 +36,19 @@ func NewSendVerificationCodeLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func (l *SendVerificationCodeLogic) SendVerificationCode(req *types.SendVerificationCodeReq) (resp *types.Response, err error) {
 	l.Info("Auth SendVerificationCode")
 
-	if !validVerifyPurpose(constvar.VerificationPurpose(req.Purpose)) {
+	if !validVerifyPurpose(req.Purpose) {
 		return nil, errorx.WrapBadRequest("无效的验证码用途", nil)
 	}
 
-	switch constvar.VerificationChannel(req.Channel) {
+	switch req.Channel {
 	case constvar.ChannelEmail:
-		return l.sendVerificationEmailCode(req.Target, constvar.VerificationPurpose(req.Purpose))
+		return l.sendVerificationEmailCode(req.Target, req.Purpose)
 	default:
 		return nil, errorx.WrapBadRequest("无效的验证码渠道", nil)
 	}
 }
 
-func (l *SendVerificationCodeLogic) sendVerificationEmailCode(target string, purpose constvar.VerificationPurpose) (*types.Response, error) {
+func (l *SendVerificationCodeLogic) sendVerificationEmailCode(target string, purpose int32) (*types.Response, error) {
 	if strings.TrimSpace(target) == "" {
 		return nil, errorx.WrapBadRequest("邮箱地址不能为空", nil)
 	}
@@ -87,7 +87,7 @@ func (l *SendVerificationCodeLogic) sendVerificationEmailCode(target string, pur
 	return &types.Response{}, nil
 }
 
-func validVerifyPurpose(purpose constvar.VerificationPurpose) bool {
+func validVerifyPurpose(purpose int32) bool {
 	switch purpose {
 	case constvar.PurposeRegistration,
 		constvar.PurposePasswordReset:

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/luyb177/silent-sign-backend/internal/constvar"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -20,26 +19,8 @@ const (
 
 type Meta struct {
 	Target  string
-	Channel constvar.VerificationChannel
-	Purpose constvar.VerificationPurpose
-}
-
-type Repository interface {
-	// SetCode 设置验证码并设置过期时间
-	SetCode(ctx context.Context, meta *Meta, code string, expire time.Duration) error
-
-	// VerifyCode 校验验证码，匹配成功则删除并返回 true；不匹配则保留并返回 false
-	VerifyCode(ctx context.Context, meta *Meta, code string) (bool, error)
-}
-
-type repo struct {
-	client *redis.Client
-}
-
-func NewVerifyRepo(client *redis.Client) Repository {
-	return &repo{
-		client: client,
-	}
+	Channel int32
+	Purpose int32
 }
 
 func (r *repo) SetCode(ctx context.Context, meta *Meta, code string, expire time.Duration) error {

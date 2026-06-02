@@ -23,6 +23,12 @@ type (
 		Channel int32  `json:"channel"` // 1: email, 2: phone
 		Purpose int32  `json:"purpose"` // 1: registration, 2: password reset
 	}
+	RegisterReq {
+		Target   string `json:"target"`   // email or phone
+		Channel  int32  `json:"channel"`  // 1: email, 2: phone
+		Code     string `json:"code"`     // 验证码
+		Password string `json:"password"` // 密码
+	}
 )
 
 @server (
@@ -34,5 +40,9 @@ service silent_sign {
 	@doc "发送验证码"
 	@handler SendVerificationCode
 	get /send_code (SendVerificationCodeReq) returns (Response)
+
+	@doc "注册账号"
+	@handler Register
+	post /register (RegisterReq) returns (Response)
 }
 

@@ -3,6 +3,13 @@
 
 package types
 
+type RegisterReq struct {
+	Target   string `json:"target"`   // email or phone
+	Channel  int32  `json:"channel"`  // 1: email, 2: phone
+	Code     string `json:"code"`     // 验证码
+	Password string `json:"password"` // 密码
+}
+
 type Response struct {
 }
 

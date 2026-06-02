@@ -2,18 +2,14 @@ package constvar
 
 import "time"
 
-type VerificationChannel int32
-
 const (
-	ChannelEmail VerificationChannel = 1
-	ChannelPhone VerificationChannel = 2
+	ChannelEmail int32 = 1
+	ChannelPhone int32 = 2
 )
 
-type VerificationPurpose int32
-
 const (
-	PurposeRegistration  VerificationPurpose = 1
-	PurposePasswordReset VerificationPurpose = 2
+	PurposeRegistration  int32 = 1
+	PurposePasswordReset int32 = 2
 )
 
 const VerifyCodeExpire = 5 * time.Minute

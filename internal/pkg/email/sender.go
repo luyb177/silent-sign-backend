@@ -31,7 +31,7 @@ func NewEmailSender(m *mail.Mailer) EmailSender {
 }
 
 func (s *DefaultEmailSender) SendVerifyCode(ctx context.Context, to, code string, expireMinutes int) error {
-	subject := "【Meow Nook】邮箱验证码"
+	subject := "【Silent Sign】邮箱验证码"
 	data := map[string]interface{}{
 		"Code":          code,
 		"ExpireMinutes": expireMinutes,
@@ -42,7 +42,7 @@ func (s *DefaultEmailSender) SendVerifyCode(ctx context.Context, to, code string
 }
 
 func (s *DefaultEmailSender) SendWelcomeEmail(ctx context.Context, to, username string) error {
-	subject := "【Meow Nook】欢迎加入"
+	subject := "【Silent Sign】欢迎加入"
 	data := map[string]interface{}{
 		"Username": username,
 		"Now":      time.Now().Format(time.RFC3339),

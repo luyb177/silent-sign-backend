@@ -46,6 +46,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
 			[]rest.Route{
 				{
+					// 修改密码
+					Method:  http.MethodPost,
+					Path:    "/change_password",
+					Handler: user.ChangePasswordHandler(serverCtx),
+				},
+				{
 					// 修改用户信息
 					Method:  http.MethodPut,
 					Path:    "/update_info",

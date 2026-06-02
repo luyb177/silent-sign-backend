@@ -97,6 +97,10 @@ type (
 		Username string `json:"username,omitempty"`
 		Avatar   string `json:"avatar,omitempty"`
 	}
+	ChangePasswordReq {
+		Code        string `json:"code"` // 验证码
+		NewPassword string `json:"new_password"`
+	}
 )
 
 @server (
@@ -109,5 +113,9 @@ service silent_sign {
 	@doc "修改用户信息"
 	@handler UpdateUserInfo
 	put /update_info (UpdateUserInfoReq) returns (Response)
+
+	@doc "修改密码"
+	@handler ChangePassword
+	post /change_password (ChangePasswordReq) returns (Response)
 }
 

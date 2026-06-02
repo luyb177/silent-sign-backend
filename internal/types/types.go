@@ -7,6 +7,11 @@ type AuthUser struct {
 	UserID uint64 `json:"user_id"`
 }
 
+type ChangePasswordReq struct {
+	Code        string `json:"code"` // 验证码
+	NewPassword string `json:"new_password"`
+}
+
 type IPLocation struct {
 	IP       string `json:"ip"`
 	Country  string `json:"country"`

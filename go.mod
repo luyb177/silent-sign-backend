@@ -4,6 +4,7 @@ go 1.26.2
 
 require (
 	github.com/go-gomail/gomail v0.0.0-20160411212932-81ebce5c23df
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20260530042244-d638015592ac
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/zeromicro/go-zero v1.10.1

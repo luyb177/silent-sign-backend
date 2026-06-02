@@ -11,6 +11,7 @@ import (
 	"github.com/luyb177/silent-sign-backend/internal/middleware"
 	"github.com/luyb177/silent-sign-backend/internal/pkg/email"
 	"github.com/luyb177/silent-sign-backend/internal/repo"
+	"github.com/zeromicro/go-zero/rest"
 )
 
 type ServiceContext struct {
@@ -20,7 +21,7 @@ type ServiceContext struct {
 	MySQLClient  *database.MySQLClient
 	EmailSender  email.EmailSender
 	Repos        *repo.Repositories
-	IPMiddleware *middleware.IPMiddleware
+	IPMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -50,6 +51,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		MySQLClient:  mc,
 		EmailSender:  emailSender,
 		Repos:        repo.NewRepositories(rc.Client, mc.DB),
-		IPMiddleware: middleware.NewIPMiddleware(c.IP2RegionConf),
+		IPMiddleware: middleware.NewIPMiddleware(c.IP2RegionConf).Handle,
 	}
 }

@@ -15,8 +15,14 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.IPMiddleware.Handle},
+			[]rest.Middleware{serverCtx.IPMiddleware},
 			[]rest.Route{
+				{
+					// 登录账号
+					Method:  http.MethodPost,
+					Path:    "/login",
+					Handler: auth.LoginHandler(serverCtx),
+				},
 				{
 					// 注册账号
 					Method:  http.MethodPost,

@@ -7,6 +7,7 @@ type contextKey string
 
 const (
 	IPLocationKey contextKey = "ip_location"
+	AuthUserKey   contextKey = "auth_user"
 )
 
 const (

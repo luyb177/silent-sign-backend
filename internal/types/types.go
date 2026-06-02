@@ -3,6 +3,10 @@
 
 package types
 
+type AuthUser struct {
+	UserID uint64 `json:"user_id"`
+}
+
 type IPLocation struct {
 	IP       string `json:"ip"`
 	Country  string `json:"country"`
@@ -10,6 +14,17 @@ type IPLocation struct {
 	City     string `json:"city"`
 	ISP      string `json:"isp"`
 	ISOCode  string `json:"iso_code"`
+}
+
+type LoginReq struct {
+	Target   string `json:"target"`   // email or phone
+	Channel  int32  `json:"channel"`  // 1: email, 2: phone
+	Password string `json:"password"` // 密码
+}
+
+type LoginResp struct {
+	Token    string   `json:"token"`
+	UserInfo UserInfo `json:"user_info"`
 }
 
 type RegisterReq struct {
@@ -26,4 +41,12 @@ type SendVerificationCodeReq struct {
 	Target  string `json:"target"`  // email or phone
 	Channel int32  `json:"channel"` // 1: email, 2: phone
 	Purpose int32  `json:"purpose"` // 1: registration, 2: password reset
+}
+
+type UserInfo struct {
+	UserID    string `json:"user_id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Avatar    string `json:"avatar"`
+	CreatedAt string `json:"created_at"`
 }

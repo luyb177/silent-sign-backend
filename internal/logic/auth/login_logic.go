@@ -5,7 +5,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/luyb177/silent-sign-backend/common/errorx"
@@ -99,7 +98,7 @@ func (l *LoginLogic) getLoginLocation() (ip, location string) {
 	if loc == nil {
 		return "未知", "未知"
 	}
-	return loc.IP, fmt.Sprintf("%s %s %s", loc.Country, loc.Province, loc.City)
+	return loc.IP, middleware.FullLocation(loc)
 }
 
 func (l *LoginLogic) buildUserInfo(u *user.User) types.UserInfo {

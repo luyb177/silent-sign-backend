@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	auth "github.com/luyb177/silent-sign-backend/internal/handler/auth"
+	moment "github.com/luyb177/silent-sign-backend/internal/handler/moment"
 	user "github.com/luyb177/silent-sign-backend/internal/handler/user"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 
@@ -39,6 +40,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/auth"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
+			[]rest.Route{
+				{
+					// 创建动态
+					Method:  http.MethodPost,
+					Path:    "/create",
+					Handler: moment.CreateMomentHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/moment"),
 	)
 
 	server.AddRoutes(

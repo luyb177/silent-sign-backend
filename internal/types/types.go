@@ -12,6 +12,13 @@ type ChangePasswordReq struct {
 	NewPassword string `json:"new_password"`
 }
 
+type CreateMomentReq struct {
+	Type      uint8    `json:"type"`
+	Content   string   `json:"content,optional"`
+	ImageURLs []string `json:"image_urls,optional"`
+	VideoURL  string   `json:"video_url,optional"`
+}
+
 type IPLocation struct {
 	IP       string `json:"ip"`
 	Country  string `json:"country"`
@@ -49,8 +56,8 @@ type SendVerificationCodeReq struct {
 }
 
 type UpdateUserInfoReq struct {
-	Username string `json:"username,omitempty"`
-	Avatar   string `json:"avatar,omitempty"`
+	Username string `json:"username,optional"`
+	Avatar   string `json:"avatar,optional"`
 }
 
 type UserInfo struct {

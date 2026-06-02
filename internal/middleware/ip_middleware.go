@@ -131,3 +131,51 @@ func GetIPLocation(ctx context.Context) *types.IPLocation {
 	}
 	return loc
 }
+
+// Country 获取国家
+func Country(loc *types.IPLocation) string {
+	if loc == nil {
+		return "未知"
+	}
+	return loc.Country
+}
+
+// Province 获取省份
+func Province(loc *types.IPLocation) string {
+	if loc == nil {
+		return "未知"
+	}
+	return loc.Province
+}
+
+// City 获取城市
+func City(loc *types.IPLocation) string {
+	if loc == nil {
+		return "未知"
+	}
+	return loc.City
+}
+
+// ISP 获取运营商
+func ISP(loc *types.IPLocation) string {
+	if loc == nil {
+		return "未知"
+	}
+	return loc.ISP
+}
+
+// FullLocation 获取完整地理位置，如"中国 广东 深圳"
+func FullLocation(loc *types.IPLocation) string {
+	if loc == nil {
+		return "未知"
+	}
+	return loc.Country + " " + loc.Province + " " + loc.City
+}
+
+// ShortLocation 获取简短位置，如"广东 深圳"
+func ShortLocation(loc *types.IPLocation) string {
+	if loc == nil {
+		return "未知"
+	}
+	return loc.Province + " " + loc.City
+}

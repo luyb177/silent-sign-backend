@@ -94,8 +94,8 @@ service silent_sign {
 //request
 type (
 	UpdateUserInfoReq {
-		Username string `json:"username,omitempty"`
-		Avatar   string `json:"avatar,omitempty"`
+		Username string `json:"username,optional"`
+		Avatar   string `json:"avatar,optional"`
 	}
 	ChangePasswordReq {
 		Code        string `json:"code"` // 验证码
@@ -117,5 +117,30 @@ service silent_sign {
 	@doc "修改密码"
 	@handler ChangePassword
 	post /change_password (ChangePasswordReq) returns (Response)
+}
+
+// ══════════════════════════════════════════════
+// Momment 需 JWT
+// ══════════════════════════════════════════════
+// request
+type (
+	CreateMomentReq {
+		Type      uint8    `json:"type"`
+		Content   string   `json:"content,optional"`
+		ImageURLs []string `json:"image_urls,optional"`
+		VideoURL  string   `json:"video_url,optional"`
+	}
+)
+
+@server (
+	prefix:     /api/v1/moment
+	tags:       "动态模块"
+	group:      moment
+	middleware: JWTMiddleware,IPMiddleware
+)
+service silent_sign {
+	@doc "创建动态"
+	@handler CreateMoment
+	post /create (CreateMomentReq) returns (Response)
 }
 

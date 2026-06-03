@@ -12,6 +12,12 @@ type ChangePasswordReq struct {
 	NewPassword string `json:"new_password"`
 }
 
+type CreateCommentReq struct {
+	TargetType uint8  `json:"target_type"`
+	TargetID   uint64 `json:"target_id"`
+	Content    string `json:"content"`
+}
+
 type CreateMomentReq struct {
 	Type      uint8    `json:"type"`
 	Content   string   `json:"content,optional"`

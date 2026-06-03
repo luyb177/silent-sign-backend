@@ -1,5 +1,6 @@
 package constvar
 
+// image comment
 const (
-	TargetTypeMoment = "moment"
+	TargetTypeMoment uint8 = 1
 )

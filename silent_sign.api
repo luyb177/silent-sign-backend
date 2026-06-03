@@ -151,3 +151,27 @@ service silent_sign {
 	post /delete (DeleteMomentReq) returns (Response)
 }
 
+// ══════════════════════════════════════════════
+// Comment 需 JWT
+// ══════════════════════════════════════════════
+// request
+type (
+	CreateCommentReq {
+		TargetType uint8  `json:"target_type"`
+		TargetID   uint64 `json:"target_id"`
+		Content    string `json:"content"`
+	}
+)
+
+@server (
+	prefix:     /api/v1/comment
+	tags:       "评论模块"
+	group:      comment
+	middleware: JWTMiddleware,IPMiddleware
+)
+service silent_sign {
+	@doc "创建评论"
+	@handler CreateComment
+	post /create (CreateCommentReq) returns (Response)
+}
+

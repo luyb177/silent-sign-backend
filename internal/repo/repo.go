@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"github.com/luyb177/silent-sign-backend/internal/repo/comment"
 	"github.com/luyb177/silent-sign-backend/internal/repo/image"
 	"github.com/luyb177/silent-sign-backend/internal/repo/moment"
 	"github.com/luyb177/silent-sign-backend/internal/repo/user"
@@ -10,21 +11,23 @@ import (
 )
 
 type Repositories struct {
-	Verify verify.Repository
-	User   user.Repository
-	Moment moment.Repository
-	Image  image.Repository
-	db     *gorm.DB
+	Verify  verify.Repository
+	User    user.Repository
+	Moment  moment.Repository
+	Image   image.Repository
+	Comment comment.Repository
+	db      *gorm.DB
 }
 
 // NewRepositories creates Repositories with both Redis and MySQL.
 func NewRepositories(redisClient *redis.Client, db *gorm.DB) *Repositories {
 	return &Repositories{
-		Verify: verify.NewVerifyRepo(redisClient),
-		User:   user.NewRepository(redisClient, db),
-		Moment: moment.NewRepository(db, redisClient),
-		Image:  image.NewRepository(db, redisClient),
-		db:     db,
+		Verify:  verify.NewVerifyRepo(redisClient),
+		User:    user.NewRepository(redisClient, db),
+		Moment:  moment.NewRepository(db, redisClient),
+		Image:   image.NewRepository(db, redisClient),
+		Comment: comment.NewRepository(db, redisClient),
+		db:      db,
 	}
 }
 

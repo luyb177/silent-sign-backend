@@ -53,6 +53,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/create",
 					Handler: comment.CreateCommentHandler(serverCtx),
 				},
+				{
+					// 删除评论
+					Method:  http.MethodPost,
+					Path:    "/delete",
+					Handler: comment.DeleteCommentHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/api/v1/comment"),

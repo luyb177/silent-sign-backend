@@ -15,6 +15,7 @@ type ChangePasswordReq struct {
 type CreateCommentReq struct {
 	TargetType uint8  `json:"target_type"`
 	TargetID   uint64 `json:"target_id"`
+	FatherID   uint64 `json:"father_id,optional"`
 	Content    string `json:"content"`
 }
 
@@ -23,6 +24,10 @@ type CreateMomentReq struct {
 	Content   string   `json:"content,optional"`
 	ImageURLs []string `json:"image_urls,optional"`
 	VideoURL  string   `json:"video_url,optional"`
+}
+
+type DeleteCommentReq struct {
+	CommentID uint64 `json:"comment_id"`
 }
 
 type DeleteMomentReq struct {

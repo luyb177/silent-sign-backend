@@ -159,7 +159,11 @@ type (
 	CreateCommentReq {
 		TargetType uint8  `json:"target_type"`
 		TargetID   uint64 `json:"target_id"`
+		FatherID   uint64 `json:"father_id,optional"`
 		Content    string `json:"content"`
+	}
+	DeleteCommentReq {
+		CommentID uint64 `json:"comment_id"`
 	}
 )
 
@@ -173,5 +177,9 @@ service silent_sign {
 	@doc "创建评论"
 	@handler CreateComment
 	post /create (CreateCommentReq) returns (Response)
+
+	@doc "删除评论"
+	@handler DeleteComment
+	post /delete (DeleteCommentReq) returns (Response)
 }
 

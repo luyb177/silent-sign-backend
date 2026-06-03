@@ -8,6 +8,7 @@ import (
 
 	auth "github.com/luyb177/silent-sign-backend/internal/handler/auth"
 	comment "github.com/luyb177/silent-sign-backend/internal/handler/comment"
+	like "github.com/luyb177/silent-sign-backend/internal/handler/like"
 	moment "github.com/luyb177/silent-sign-backend/internal/handler/moment"
 	user "github.com/luyb177/silent-sign-backend/internal/handler/user"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
@@ -62,6 +63,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/comment"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
+			[]rest.Route{
+				{
+					// 点赞/取消点赞
+					Method:  http.MethodPost,
+					Path:    "/toggle",
+					Handler: like.ToggleLikeHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/like"),
 	)
 
 	server.AddRoutes(

@@ -70,6 +70,16 @@ type SendVerificationCodeReq struct {
 	Purpose int32  `json:"purpose"` // 1: registration, 2: password reset
 }
 
+type ToggleLikeReq struct {
+	TargetType uint8  `json:"target_type"`
+	TargetID   uint64 `json:"target_id"`
+}
+
+type ToggleLikeResp struct {
+	Liked   bool   `json:"liked"`
+	LikeNum uint64 `json:"like_num"`
+}
+
 type UpdateUserInfoReq struct {
 	Username string `json:"username,optional"`
 	Avatar   string `json:"avatar,optional"`

@@ -9,6 +9,7 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, m *Moment, tx ...*gorm.DB) error
+	Delete(ctx context.Context, userID, momentID uint64, tx ...*gorm.DB) error
 }
 
 type repo struct {
@@ -26,4 +27,9 @@ func NewRepository(db *gorm.DB, client *redis.Client) Repository {
 func (r *repo) Create(ctx context.Context, m *Moment, tx ...*gorm.DB) error {
 	db := r.getDB(ctx, tx...)
 	return db.Create(m).Error
+}
+
+func (r *repo) Delete(ctx context.Context, userID, momentID uint64, tx ...*gorm.DB) error {
+	db := r.getDB(ctx, tx...)
+	return db.Where("user_id = ? AND id = ?", userID, momentID).Delete(&Moment{}).Error
 }

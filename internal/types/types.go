@@ -19,6 +19,10 @@ type CreateMomentReq struct {
 	VideoURL  string   `json:"video_url,optional"`
 }
 
+type DeleteMomentReq struct {
+	MomentID uint64 `json:"moment_id"`
+}
+
 type IPLocation struct {
 	IP       string `json:"ip"`
 	Country  string `json:"country"`

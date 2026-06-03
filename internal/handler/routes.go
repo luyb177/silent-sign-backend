@@ -52,6 +52,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/create",
 					Handler: moment.CreateMomentHandler(serverCtx),
 				},
+				{
+					// 删除动态
+					Method:  http.MethodPost,
+					Path:    "/delete",
+					Handler: moment.DeleteMomentHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/api/v1/moment"),

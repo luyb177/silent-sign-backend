@@ -108,7 +108,7 @@ func (l *CreateCommentLogic) afterCreate(req *types.CreateCommentReq, tx *gorm.D
 
 // incrMomentComment 原子增加动态评论数并刷新热度（避免 read-modify-write 覆盖）
 func (l *CreateCommentLogic) incrMomentComment(momentID uint64, tx *gorm.DB) error {
-	err := l.svcCtx.Repos.Moment.IncrementCommentNum(l.ctx, momentID, tx)
+	err := l.svcCtx.Repos.Moment.AdjustCommentNum(l.ctx, momentID, 1, tx)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errorx.WrapBadRequest("动态不存在", nil)
 	}

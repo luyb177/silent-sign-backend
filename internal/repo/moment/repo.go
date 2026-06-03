@@ -12,7 +12,7 @@ type Repository interface {
 	Create(ctx context.Context, m *Moment, tx ...*gorm.DB) error
 	Delete(ctx context.Context, userID, momentID uint64, tx ...*gorm.DB) error
 	FindByID(ctx context.Context, id uint64, tx ...*gorm.DB) (*Moment, error)
-	IncrementCommentNum(ctx context.Context, id uint64, tx ...*gorm.DB) error
+	AdjustCommentNum(ctx context.Context, id uint64, delta int, tx ...*gorm.DB) error
 }
 
 type repo struct {
@@ -53,12 +53,19 @@ func (r *repo) Update(ctx context.Context, id uint64, updates map[string]interfa
 	return db.Model(&Moment{}).Where("id = ?", id).Updates(updates).Error
 }
 
-// IncrementCommentNum 原子增加评论数并刷新热度分数
-func (r *repo) IncrementCommentNum(ctx context.Context, id uint64, tx ...*gorm.DB) error {
+// AdjustCommentNum 原子增减评论数并刷新热度（delta 为正增、为负减）
+func (r *repo) AdjustCommentNum(ctx context.Context, id uint64, delta int, tx ...*gorm.DB) error {
 	db := r.getDB(ctx, tx...)
-	result := db.Model(&Moment{}).Where("id = ?", id).Updates(map[string]interface{}{
-		"comment_num": gorm.Expr("comment_num + 1"),
-		"hot_score":   gorm.Expr("ROUND((like_num * 3 + (comment_num + 1) * 5 + share_num * 8 + UNIX_TIMESTAMP(created_at) / 45000.0) * 100) / 100"),
+	sign := "+"
+	guard := ""
+	if delta < 0 {
+		sign = "-"
+		guard = " AND comment_num > 0"
+		delta = -delta
+	}
+	result := db.Model(&Moment{}).Where("id = ?"+guard, id).Updates(map[string]interface{}{
+		"comment_num": gorm.Expr("comment_num "+sign+" ?", delta),
+		"hot_score":   gorm.Expr("ROUND((like_num * 3 + (comment_num "+sign+" ?) * 5 + share_num * 8 + UNIX_TIMESTAMP(created_at) / 45000.0) * 100) / 100", delta),
 	})
 	if result.Error != nil {
 		return result.Error

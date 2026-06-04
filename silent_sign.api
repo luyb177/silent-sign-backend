@@ -30,6 +30,11 @@ type (
 		Avatar    string `json:"avatar"`
 		CreatedAt string `json:"created_at"`
 	}
+	CreatorInfo {
+		UserID uint64 `json:"user_id"`
+		Name   string `json:"name"`
+		Avatar string `json:"avatar"`
+	}
 )
 
 // response
@@ -122,6 +127,24 @@ service silent_sign {
 // ══════════════════════════════════════════════
 // Momment 需 JWT
 // ══════════════════════════════════════════════
+// model
+type (
+	MomentInfo {
+		MomentID   uint64      `json:"moment_id"`
+		UpdatedAt  string      `json:"updated_at"`
+		Creator    CreatorInfo `json:"creator"`
+		Type       uint8       `json:"type"`
+		Content    string      `json:"content,optional"`
+		VideoURL   string      `json:"video_url,optional"`
+		ImageURLs  []string    `json:"image_urls,optional"`
+		LikeNum    uint64      `json:"like_num"`
+		CommentNum uint64      `json:"comment_num"`
+		ShareNum   uint64      `json:"share_num"`
+		ViewNum    uint64      `json:"view_num"`
+		IsLiked    bool        `json:"is_liked"`
+	}
+)
+
 // request
 type (
 	CreateMomentReq {
@@ -132,6 +155,16 @@ type (
 	}
 	DeleteMomentReq {
 		MomentID uint64 `json:"moment_id"`
+	}
+	GetMomentReq {
+		MomentID uint64 `json:"moment_id"`
+	}
+)
+
+// response
+type (
+	GetMomentResp {
+		Moment MomentInfo `json:"moment"`
 	}
 )
 
@@ -149,6 +182,10 @@ service silent_sign {
 	@doc "删除动态"
 	@handler DeleteMoment
 	post /delete (DeleteMomentReq) returns (Response)
+
+	@doc "获取动态详情"
+	@handler GetMoment
+	get /get (GetMomentReq) returns (GetMomentResp)
 }
 
 // ══════════════════════════════════════════════

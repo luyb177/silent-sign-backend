@@ -96,6 +96,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/delete",
 					Handler: moment.DeleteMomentHandler(serverCtx),
 				},
+				{
+					// 获取动态详情
+					Method:  http.MethodGet,
+					Path:    "/get",
+					Handler: moment.GetMomentHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/api/v1/moment"),

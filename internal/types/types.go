@@ -26,12 +26,26 @@ type CreateMomentReq struct {
 	VideoURL  string   `json:"video_url,optional"`
 }
 
+type CreatorInfo struct {
+	UserID uint64 `json:"user_id"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}
+
 type DeleteCommentReq struct {
 	CommentID uint64 `json:"comment_id"`
 }
 
 type DeleteMomentReq struct {
 	MomentID uint64 `json:"moment_id"`
+}
+
+type GetMomentReq struct {
+	MomentID uint64 `json:"moment_id"`
+}
+
+type GetMomentResp struct {
+	Moment MomentInfo `json:"moment"`
 }
 
 type IPLocation struct {
@@ -52,6 +66,21 @@ type LoginReq struct {
 type LoginResp struct {
 	Token    string   `json:"token"`
 	UserInfo UserInfo `json:"user_info"`
+}
+
+type MomentInfo struct {
+	MomentID   uint64      `json:"moment_id"`
+	UpdatedAt  string      `json:"updated_at"`
+	Creator    CreatorInfo `json:"creator"`
+	Type       uint8       `json:"type"`
+	Content    string      `json:"content,optional"`
+	VideoURL   string      `json:"video_url,optional"`
+	ImageURLs  []string    `json:"image_urls,optional"`
+	LikeNum    uint64      `json:"like_num"`
+	CommentNum uint64      `json:"comment_num"`
+	ShareNum   uint64      `json:"share_num"`
+	ViewNum    uint64      `json:"view_num"`
+	IsLiked    bool        `json:"is_liked"`
 }
 
 type RegisterReq struct {

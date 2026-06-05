@@ -30,7 +30,11 @@ func RegisterWSRoute(server *rest.Server, svcCtx *svc.ServiceContext) {
 // ChatHandler WebSocket 聊天入口
 func ChatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.URL.Query().Get("token")
+		// 优先从 Sec-WebSocket-Protocol 头取 token，兜底 query 参数
+		token := r.Header.Get("Sec-WebSocket-Protocol")
+		if token == "" {
+			token = r.URL.Query().Get("token")
+		}
 		if token == "" {
 			http.Error(w, "missing token", http.StatusUnauthorized)
 			return

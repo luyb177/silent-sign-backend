@@ -3,6 +3,7 @@ package ws
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -33,21 +34,31 @@ type WSMessage struct {
 
 // Client 代表一个 WebSocket 连接
 type Client struct {
-	userID uint64
-	hub    *Hub
-	repos  *repo.Repositories
-	conn   *websocket.Conn
-	send   chan []byte
+	userID    uint64
+	hub       *Hub
+	repos     *repo.Repositories
+	conn      *websocket.Conn
+	send      chan []byte
+	closeChan chan struct{}
+	closeOnce sync.Once
 }
 
 func NewClient(userID uint64, hub *Hub, repos *repo.Repositories, conn *websocket.Conn) *Client {
 	return &Client{
-		userID: userID,
-		hub:    hub,
-		repos:  repos,
-		conn:   conn,
-		send:   make(chan []byte, 64),
+		userID:    userID,
+		hub:       hub,
+		repos:     repos,
+		conn:      conn,
+		send:      make(chan []byte, 64),
+		closeChan: make(chan struct{}),
 	}
+}
+
+// Close 安全关闭 Client（仅通知退出，不关闭 send channel）
+func (c *Client) Close() {
+	c.closeOnce.Do(func() {
+		close(c.closeChan)
+	})
 }
 
 // ReadPump 从 WebSocket 读取消息
@@ -92,25 +103,18 @@ func (c *Client) WritePump() {
 	for {
 		select {
 		case data, ok := <-c.send:
-			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err != nil {
-				return
-			}
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				if err != nil {
-					return
-				}
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 			if err := c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
 				return
 			}
+		case <-c.closeChan:
+			return
 		case <-ticker.C:
-			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err != nil {
-				return
-			}
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
@@ -131,7 +135,9 @@ func (c *Client) handleMessage(wsMsg *WSMessage) {
 		Type:       constvar.MsgTypeChat,
 		Content:    wsMsg.Content,
 	}
-	if err := c.repos.Message.Create(context.Background(), m); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	if err := c.repos.Message.Create(ctx, m); err != nil {
 		logx.Errorf("ws save message failed: %v", err)
 		return
 	}

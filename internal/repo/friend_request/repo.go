@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/luyb177/silent-sign-backend/internal/constvar"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
@@ -45,8 +46,8 @@ func (r *repo) FindPending(ctx context.Context, fromUserID, toUserID uint64, tx 
 	db := r.getDB(ctx, tx...)
 	var fr FriendRequest
 	err := db.Where(
-		"((from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)) AND status = 1",
-		fromUserID, toUserID, toUserID, fromUserID,
+		"((from_user_id = ? AND to_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)) AND status = ?",
+		fromUserID, toUserID, toUserID, fromUserID, constvar.FriendRequestStatusPending,
 	).First(&fr).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -64,7 +65,7 @@ func (r *repo) ListPendingToUser(ctx context.Context, toUserID uint64, limit int
 	db := r.getDB(ctx, tx...)
 	var requests []*FriendRequest
 
-	query := db.Where("to_user_id = ? AND status = 1", toUserID)
+	query := db.Where("to_user_id = ? AND status = ?", toUserID, constvar.FriendRequestStatusPending)
 	if cursorID != 0 {
 		query = query.Where("id < ?", cursorID)
 	}

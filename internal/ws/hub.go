@@ -16,18 +16,18 @@ func NewHub() *Hub {
 	}
 }
 
-// Register 注册客户端（替换同一用户的旧连接）
+// Register 注册客户端（替换同一用户的旧连接，通过 closeChan 安全通知退出）
 func (h *Hub) Register(c *Client) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
 	if old, ok := h.clients[c.userID]; ok {
-		close(old.send)
+		old.Close()
 	}
 	h.clients[c.userID] = c
 }
 
-// Unregister 移除客户端
+// Unregister 移除客户端并通知退出
 func (h *Hub) Unregister(c *Client) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -35,6 +35,7 @@ func (h *Hub) Unregister(c *Client) {
 	if cur, ok := h.clients[c.userID]; ok && cur == c {
 		delete(h.clients, c.userID)
 	}
+	c.Close()
 }
 
 // SendToUser 向指定用户推送消息（非阻塞）

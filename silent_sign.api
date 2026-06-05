@@ -402,3 +402,95 @@ service silent_sign {
 	get /events returns (Response)
 }
 
+// ══════════════════════════════════════════════
+// Friend 需 JWT
+// ══════════════════════════════════════════════
+// model
+type (
+	FriendRequestInfo {
+		RequestID uint64      `json:"request_id"`
+		CreatedAt string      `json:"created_at"`
+		FromUser  CreatorInfo `json:"from_user"`
+		ToUser    CreatorInfo `json:"to_user"`
+		Status    uint8       `json:"status"`
+	}
+	FriendRequestPageToken {
+		ID uint64 `json:"id"`
+	}
+	FriendInfo {
+		FriendID  uint64      `json:"friend_id"`
+		CreatedAt string      `json:"created_at"`
+		User      CreatorInfo `json:"user"`
+	}
+	FriendPageToken {
+		ID uint64 `json:"id"`
+	}
+)
+
+// request
+type (
+	SendFriendRequestReq {
+		ToUserID uint64 `json:"to_user_id"`
+	}
+	HandleFriendRequestReq {
+		RequestID uint64 `json:"request_id"`
+	}
+	DeleteFriendReq {
+		FriendID uint64 `json:"friend_id"`
+	}
+	ListFriendRequestsReq {
+		PageSize  uint32 `form:"page_size"`
+		PageToken string `form:"page_token,optional"`
+	}
+	ListFriendsReq {
+		PageSize  uint32 `form:"page_size"`
+		PageToken string `form:"page_token,optional"`
+	}
+)
+
+// response
+type (
+	ListFriendRequestsResp {
+		Requests  []FriendRequestInfo `json:"requests"`
+		PageToken string              `json:"page_token"`
+		HasMore   bool                `json:"has_more"`
+	}
+	ListFriendsResp {
+		Friends   []FriendInfo `json:"friends"`
+		PageToken string       `json:"page_token"`
+		HasMore   bool         `json:"has_more"`
+	}
+)
+
+@server (
+	prefix:     /api/v1/friend
+	tags:       "好友模块"
+	group:      friend
+	middleware: JWTMiddleware,IPMiddleware
+)
+service silent_sign {
+	@doc "发送好友申请"
+	@handler SendFriendRequest
+	post /request (SendFriendRequestReq) returns (Response)
+
+	@doc "通过好友申请"
+	@handler AcceptFriendRequest
+	post /accept (HandleFriendRequestReq) returns (Response)
+
+	@doc "拒绝好友申请"
+	@handler RejectFriendRequest
+	post /reject (HandleFriendRequestReq) returns (Response)
+
+	@doc "删除好友"
+	@handler DeleteFriend
+	post /delete (DeleteFriendReq) returns (Response)
+
+	@doc "待处理申请列表"
+	@handler ListFriendRequests
+	get /requests (ListFriendRequestsReq) returns (ListFriendRequestsResp)
+
+	@doc "好友列表"
+	@handler ListFriends
+	get /list (ListFriendsReq) returns (ListFriendsResp)
+}
+

@@ -15,6 +15,7 @@ import (
 	"github.com/luyb177/silent-sign-backend/internal/pkg/email"
 	"github.com/luyb177/silent-sign-backend/internal/repo"
 	"github.com/luyb177/silent-sign-backend/internal/sse"
+	"github.com/luyb177/silent-sign-backend/internal/ws"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -26,6 +27,7 @@ type ServiceContext struct {
 	EmailSender   email.EmailSender
 	Repos         *repo.Repositories
 	SSEHub        *sse.Hub
+	WSHub         *ws.Hub
 	JWTHandler    jwtx.Handler
 	IPMiddleware  rest.Middleware
 	JWTMiddleware rest.Middleware
@@ -61,6 +63,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		EmailSender:   emailSender,
 		Repos:         repo.NewRepositories(rc.Client, mc.DB),
 		SSEHub:        sse.NewHub(),
+		WSHub:         ws.NewHub(),
 		JWTHandler:    jwtHandler,
 		IPMiddleware:  middleware.NewIPMiddleware(c.IP2RegionConf).Handle,
 		JWTMiddleware: middleware.NewJWTMiddleware(jwtHandler).Handle,

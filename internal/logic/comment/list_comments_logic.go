@@ -118,7 +118,7 @@ func (l *ListCommentsLogic) ListComments(req *types.ListCommentsReq) (resp *type
 		ci := types.CommentInfo{
 			CommentID: c.ID,
 			CreatedAt: c.CreatedAt.Format(time.DateTime),
-			FartherID: c.FatherID,
+			FatherID:  c.FatherID,
 			Location:  c.Location,
 			Content:   c.Content,
 			LikeNum:   c.LikeNum,

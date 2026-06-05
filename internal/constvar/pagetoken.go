@@ -1,7 +1,8 @@
 package constvar
 
 const (
-	MomentPageTokenPrefix = "moment"
+	MomentPageTokenPrefix  = "moment"
+	CommentPageTokenPrefix = "comment"
 )
 
 const (

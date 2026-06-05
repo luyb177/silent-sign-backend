@@ -12,6 +12,24 @@ type ChangePasswordReq struct {
 	NewPassword string `json:"new_password"`
 }
 
+type CommentInfo struct {
+	CommentID uint64      `json:"comment_id"`
+	CreatedAt string      `json:"created_at"`
+	FartherID uint64      `json:"farther_id"` // 父评论ID，0表示一级评论
+	Creator   CreatorInfo `json:"creator"`
+	Location  string      `json:"location"`
+	Content   string      `json:"content"`
+	LikeNum   uint64      `json:"like_num"`
+	SubNum    uint64      `json:"sub_num"`
+	IsLiked   bool        `json:"is_liked"`
+}
+
+type CommentPageToken struct {
+	PageToken
+	LikeNum uint64 `json:"like_num,optional"`
+	SubNum  uint64 `json:"sub_num,optional"`
+}
+
 type CreateCommentReq struct {
 	TargetType uint8  `json:"target_type"`
 	TargetID   uint64 `json:"target_id"`
@@ -55,6 +73,20 @@ type IPLocation struct {
 	City     string `json:"city"`
 	ISP      string `json:"isp"`
 	ISOCode  string `json:"iso_code"`
+}
+
+type ListCommentsReq struct {
+	TargetType uint8  `form:"target_type"`
+	TargetID   uint64 `form:"target_id"`
+	FatherID   uint64 `form:"father_id,optional"` // 0=父评论列表, >0=子评论列表
+	PageSize   uint32 `form:"page_size"`
+	PageToken  string `form:"page_token,optional"`
+}
+
+type ListCommentsResp struct {
+	Comments  []CommentInfo `json:"comments"`
+	PageToken string        `json:"page_token"`
+	HasMore   bool          `json:"has_more"`
 }
 
 type ListMomentsReq struct {

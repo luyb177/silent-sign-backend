@@ -3,6 +3,7 @@ package comment
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -16,6 +17,8 @@ type Repository interface {
 	FindByID(ctx context.Context, id uint64, tx ...*gorm.DB) (*Comment, error)
 	FindByIDForUpdate(ctx context.Context, id uint64, tx ...*gorm.DB) (*Comment, error)
 	AdjustSubNum(ctx context.Context, id uint64, delta int, tx ...*gorm.DB) error
+	ListByHot(ctx context.Context, targetType uint8, targetID uint64, cursorLikeNum, cursorSubNum uint64, cursorTime time.Time, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Comment, error)
+	ListByCreatedAtAsc(ctx context.Context, targetType uint8, targetID, fatherID uint64, cursorTime time.Time, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Comment, error)
 }
 
 type repo struct {
@@ -89,4 +92,38 @@ func (r *repo) FindByIDForUpdate(ctx context.Context, id uint64, tx ...*gorm.DB)
 		return nil, nil
 	}
 	return &c, err
+}
+
+// ListByHot 按热度排序查询父评论（like_num DESC, sub_num DESC, created_at DESC），支持游标分页
+func (r *repo) ListByHot(ctx context.Context, targetType uint8, targetID uint64, cursorLikeNum, cursorSubNum uint64, cursorTime time.Time, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Comment, error) {
+	db := r.getDB(ctx, tx...)
+	var comments []*Comment
+
+	query := db.Where("target_type = ? AND target_id = ? AND father_id = 0", targetType, targetID)
+	if cursorID != 0 {
+		query = query.Where(
+			"(like_num, sub_num, created_at, id) < (?, ?, ?, ?)",
+			cursorLikeNum, cursorSubNum, cursorTime, cursorID,
+		)
+	}
+	err := query.Order("like_num DESC, sub_num DESC, created_at DESC, id DESC").
+		Limit(limit).Find(&comments).Error
+	return comments, err
+}
+
+// ListByCreatedAtAsc 按创建时间正序查询子评论（created_at ASC），支持游标分页
+func (r *repo) ListByCreatedAtAsc(ctx context.Context, targetType uint8, targetID, fatherID uint64, cursorTime time.Time, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Comment, error) {
+	db := r.getDB(ctx, tx...)
+	var comments []*Comment
+
+	query := db.Where("target_type = ? AND target_id = ? AND father_id = ?", targetType, targetID, fatherID)
+	if cursorID != 0 {
+		query = query.Where(
+			"(created_at, id) > (?, ?)",
+			cursorTime, cursorID,
+		)
+	}
+	err := query.Order("created_at ASC, id ASC").
+		Limit(limit).Find(&comments).Error
+	return comments, err
 }

@@ -9,6 +9,7 @@ import (
 	auth "github.com/luyb177/silent-sign-backend/internal/handler/auth"
 	comment "github.com/luyb177/silent-sign-backend/internal/handler/comment"
 	like "github.com/luyb177/silent-sign-backend/internal/handler/like"
+	message "github.com/luyb177/silent-sign-backend/internal/handler/message"
 	moment "github.com/luyb177/silent-sign-backend/internal/handler/moment"
 	user "github.com/luyb177/silent-sign-backend/internal/handler/user"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
@@ -84,6 +85,39 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/like"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
+			[]rest.Route{
+				{
+					// 消息列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: message.ListMessagesHandler(serverCtx),
+				},
+				{
+					// 标记已读
+					Method:  http.MethodPost,
+					Path:    "/read",
+					Handler: message.MarkReadHandler(serverCtx),
+				},
+				{
+					// 发送消息
+					Method:  http.MethodPost,
+					Path:    "/send",
+					Handler: message.SendMessageHandler(serverCtx),
+				},
+				{
+					// 未读消息数
+					Method:  http.MethodGet,
+					Path:    "/unread_count",
+					Handler: message.UnreadCountHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/message"),
 	)
 
 	server.AddRoutes(

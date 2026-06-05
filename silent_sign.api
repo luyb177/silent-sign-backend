@@ -315,3 +315,73 @@ service silent_sign {
 	post /toggle (ToggleLikeReq) returns (ToggleLikeResp)
 }
 
+// ══════════════════════════════════════════════
+// Message 需 JWT
+// ══════════════════════════════════════════════
+// model
+type (
+	MessageInfo {
+		MessageID uint64      `json:"message_id"`
+		CreatedAt string      `json:"created_at"`
+		Creator   CreatorInfo `json:"creator"`
+		Type      uint8       `json:"type"`
+		Content   string      `json:"content"`
+		IsRead    bool        `json:"is_read"`
+	}
+	MessagePageToken {
+		ID uint64 `json:"id"`
+	}
+)
+
+// request
+type (
+	SendMessageReq {
+		ReceiverID uint64 `json:"receiver_id"`
+		Type       uint8  `json:"type"`
+		Content    string `json:"content"`
+	}
+	ListMessagesReq {
+		PageSize  uint32 `form:"page_size"`
+		PageToken string `form:"page_token,optional"`
+	}
+	MarkReadReq {
+		MessageIDs []uint64 `json:"message_ids"`
+	}
+)
+
+// response
+type (
+	ListMessagesResp {
+		Messages  []MessageInfo `json:"messages"`
+		PageToken string        `json:"page_token"`
+		HasMore   bool          `json:"has_more"`
+	}
+	UnreadCountResp {
+		Count int64 `json:"count"`
+	}
+)
+
+@server (
+	prefix:     /api/v1/message
+	tags:       "消息模块"
+	group:      message
+	middleware: JWTMiddleware,IPMiddleware
+)
+service silent_sign {
+	@doc "发送消息"
+	@handler SendMessage
+	post /send (SendMessageReq) returns (Response)
+
+	@doc "消息列表"
+	@handler ListMessages
+	get /list (ListMessagesReq) returns (ListMessagesResp)
+
+	@doc "标记已读"
+	@handler MarkRead
+	post /read (MarkReadReq) returns (Response)
+
+	@doc "未读消息数"
+	@handler UnreadCount
+	get /unread_count returns (UnreadCountResp)
+}
+

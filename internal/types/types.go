@@ -89,6 +89,17 @@ type ListCommentsResp struct {
 	HasMore   bool          `json:"has_more"`
 }
 
+type ListMessagesReq struct {
+	PageSize  uint32 `form:"page_size"`
+	PageToken string `form:"page_token,optional"`
+}
+
+type ListMessagesResp struct {
+	Messages  []MessageInfo `json:"messages"`
+	PageToken string        `json:"page_token"`
+	HasMore   bool          `json:"has_more"`
+}
+
 type ListMomentsReq struct {
 	PageSize  uint32 `form:"page_size"`
 	SortType  uint8  `form:"sort_type,optional"`
@@ -110,6 +121,23 @@ type LoginReq struct {
 type LoginResp struct {
 	Token    string   `json:"token"`
 	UserInfo UserInfo `json:"user_info"`
+}
+
+type MarkReadReq struct {
+	MessageIDs []uint64 `json:"message_ids"`
+}
+
+type MessageInfo struct {
+	MessageID uint64      `json:"message_id"`
+	CreatedAt string      `json:"created_at"`
+	Creator   CreatorInfo `json:"creator"`
+	Type      uint8       `json:"type"`
+	Content   string      `json:"content"`
+	IsRead    bool        `json:"is_read"`
+}
+
+type MessagePageToken struct {
+	ID uint64 `json:"id"`
 }
 
 type MomentInfo struct {
@@ -149,6 +177,12 @@ type RegisterReq struct {
 type Response struct {
 }
 
+type SendMessageReq struct {
+	ReceiverID uint64 `json:"receiver_id"`
+	Type       uint8  `json:"type"`
+	Content    string `json:"content"`
+}
+
 type SendVerificationCodeReq struct {
 	Target  string `json:"target"`  // email or phone
 	Channel int32  `json:"channel"` // 1: email, 2: phone
@@ -163,6 +197,10 @@ type ToggleLikeReq struct {
 type ToggleLikeResp struct {
 	Liked   bool   `json:"liked"`
 	LikeNum uint64 `json:"like_num"`
+}
+
+type UnreadCountResp struct {
+	Count int64 `json:"count"`
 }
 
 type UpdateUserInfoReq struct {

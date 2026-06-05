@@ -99,6 +99,12 @@ func (l *CreateCommentLogic) validateParent(fatherID uint64, targetType uint8, t
 
 // afterCreate 评论创建后的后置处理（事务内），根据目标类型分发
 func (l *CreateCommentLogic) afterCreate(req *types.CreateCommentReq, tx *gorm.DB) error {
+	// 子评论：增加父评论的 SubNum
+	if req.FatherID != 0 {
+		if err := l.svcCtx.Repos.Comment.AdjustSubNum(l.ctx, req.FatherID, 1, tx); err != nil {
+			return err
+		}
+	}
 	switch req.TargetType {
 	case constvar.TargetTypeMoment:
 		return l.incrMomentComment(req.TargetID, tx)

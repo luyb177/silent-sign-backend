@@ -8,6 +8,12 @@ const (
 	MomentTypeImage     uint8 = 5 // 纯图片
 )
 
+// 排序类型
+const (
+	SortByCreatedAt uint8 = 1 // 按创建时间（最新）
+	SortByHot       uint8 = 2 // 按热度
+)
+
 // 热度分值权重
 // 公式：LikeNum×LikeWeight + CommentNum×CommentWeight + ShareNum×ShareWeight + Unix(created_at) / Decay
 const (

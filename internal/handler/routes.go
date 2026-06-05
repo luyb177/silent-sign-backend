@@ -5,11 +5,14 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	auth "github.com/luyb177/silent-sign-backend/internal/handler/auth"
 	comment "github.com/luyb177/silent-sign-backend/internal/handler/comment"
 	like "github.com/luyb177/silent-sign-backend/internal/handler/like"
+	message "github.com/luyb177/silent-sign-backend/internal/handler/message"
 	moment "github.com/luyb177/silent-sign-backend/internal/handler/moment"
+	sse "github.com/luyb177/silent-sign-backend/internal/handler/sse"
 	user "github.com/luyb177/silent-sign-backend/internal/handler/user"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 
@@ -35,7 +38,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					// 发送验证码
-					Method:  http.MethodGet,
+					Method:  http.MethodPost,
 					Path:    "/send_code",
 					Handler: auth.SendVerificationCodeHandler(serverCtx),
 				},
@@ -59,6 +62,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/delete",
 					Handler: comment.DeleteCommentHandler(serverCtx),
+				},
+				{
+					// 分页获取评论列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: comment.ListCommentsHandler(serverCtx),
 				},
 			}...,
 		),
@@ -85,6 +94,39 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
 			[]rest.Route{
 				{
+					// 消息列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: message.ListMessagesHandler(serverCtx),
+				},
+				{
+					// 标记已读
+					Method:  http.MethodPost,
+					Path:    "/read",
+					Handler: message.MarkReadHandler(serverCtx),
+				},
+				{
+					// 发送消息
+					Method:  http.MethodPost,
+					Path:    "/send",
+					Handler: message.SendMessageHandler(serverCtx),
+				},
+				{
+					// 未读消息数
+					Method:  http.MethodGet,
+					Path:    "/unread_count",
+					Handler: message.UnreadCountHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/message"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
+			[]rest.Route{
+				{
 					// 创建动态
 					Method:  http.MethodPost,
 					Path:    "/create",
@@ -96,9 +138,38 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/delete",
 					Handler: moment.DeleteMomentHandler(serverCtx),
 				},
+				{
+					// 获取动态详情
+					Method:  http.MethodGet,
+					Path:    "/get",
+					Handler: moment.GetMomentHandler(serverCtx),
+				},
+				{
+					// 分页获取动态列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: moment.ListMomentsHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/api/v1/moment"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware},
+			[]rest.Route{
+				{
+					// SSE 事件流
+					Method:  http.MethodGet,
+					Path:    "/events",
+					Handler: sse.EventsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/sse"),
+		rest.WithTimeout(0*time.Nanosecond),
+		rest.WithSSE(),
 	)
 
 	server.AddRoutes(
@@ -113,7 +184,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					// 修改用户信息
-					Method:  http.MethodPut,
+					Method:  http.MethodPost,
 					Path:    "/update_info",
 					Handler: user.UpdateUserInfoHandler(serverCtx),
 				},

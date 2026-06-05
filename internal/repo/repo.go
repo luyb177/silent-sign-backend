@@ -4,6 +4,7 @@ import (
 	"github.com/luyb177/silent-sign-backend/internal/repo/comment"
 	"github.com/luyb177/silent-sign-backend/internal/repo/image"
 	"github.com/luyb177/silent-sign-backend/internal/repo/like"
+	"github.com/luyb177/silent-sign-backend/internal/repo/message"
 	"github.com/luyb177/silent-sign-backend/internal/repo/moment"
 	"github.com/luyb177/silent-sign-backend/internal/repo/user"
 	"github.com/luyb177/silent-sign-backend/internal/repo/verify"
@@ -18,6 +19,7 @@ type Repositories struct {
 	Image   image.Repository
 	Comment comment.Repository
 	Like    like.Repository
+	Message message.Repository
 	db      *gorm.DB
 }
 
@@ -30,6 +32,7 @@ func NewRepositories(redisClient *redis.Client, db *gorm.DB) *Repositories {
 		Image:   image.NewRepository(db, redisClient),
 		Comment: comment.NewRepository(db, redisClient),
 		Like:    like.NewRepository(db, redisClient),
+		Message: message.NewRepository(db, redisClient),
 		db:      db,
 	}
 }

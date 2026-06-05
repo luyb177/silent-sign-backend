@@ -12,6 +12,24 @@ type ChangePasswordReq struct {
 	NewPassword string `json:"new_password"`
 }
 
+type CommentInfo struct {
+	CommentID uint64      `json:"comment_id"`
+	CreatedAt string      `json:"created_at"`
+	FatherID  uint64      `json:"father_id"` // 父评论ID，0表示一级评论
+	Creator   CreatorInfo `json:"creator"`
+	Location  string      `json:"location"`
+	Content   string      `json:"content"`
+	LikeNum   uint64      `json:"like_num"`
+	SubNum    uint64      `json:"sub_num"`
+	IsLiked   bool        `json:"is_liked"`
+}
+
+type CommentPageToken struct {
+	PageToken
+	LikeNum uint64 `json:"like_num,optional"`
+	SubNum  uint64 `json:"sub_num,optional"`
+}
+
 type CreateCommentReq struct {
 	TargetType uint8  `json:"target_type"`
 	TargetID   uint64 `json:"target_id"`
@@ -26,12 +44,26 @@ type CreateMomentReq struct {
 	VideoURL  string   `json:"video_url,optional"`
 }
 
+type CreatorInfo struct {
+	UserID uint64 `json:"user_id"`
+	Name   string `json:"name"`
+	Avatar string `json:"avatar"`
+}
+
 type DeleteCommentReq struct {
 	CommentID uint64 `json:"comment_id"`
 }
 
 type DeleteMomentReq struct {
 	MomentID uint64 `json:"moment_id"`
+}
+
+type GetMomentReq struct {
+	MomentID uint64 `form:"moment_id"`
+}
+
+type GetMomentResp struct {
+	Moment MomentInfo `json:"moment"`
 }
 
 type IPLocation struct {
@@ -41,6 +73,43 @@ type IPLocation struct {
 	City     string `json:"city"`
 	ISP      string `json:"isp"`
 	ISOCode  string `json:"iso_code"`
+}
+
+type ListCommentsReq struct {
+	TargetType uint8  `form:"target_type"`
+	TargetID   uint64 `form:"target_id"`
+	FatherID   uint64 `form:"father_id,optional"` // 0=父评论列表, >0=子评论列表
+	PageSize   uint32 `form:"page_size"`
+	PageToken  string `form:"page_token,optional"`
+}
+
+type ListCommentsResp struct {
+	Comments  []CommentInfo `json:"comments"`
+	PageToken string        `json:"page_token"`
+	HasMore   bool          `json:"has_more"`
+}
+
+type ListMessagesReq struct {
+	PageSize  uint32 `form:"page_size"`
+	PageToken string `form:"page_token,optional"`
+}
+
+type ListMessagesResp struct {
+	Messages  []MessageInfo `json:"messages"`
+	PageToken string        `json:"page_token"`
+	HasMore   bool          `json:"has_more"`
+}
+
+type ListMomentsReq struct {
+	PageSize  uint32 `form:"page_size"`
+	SortType  uint8  `form:"sort_type,optional"`
+	PageToken string `form:"page_token,optional"`
+}
+
+type ListMomentsResp struct {
+	Moments   []MomentInfo `json:"moments"`
+	PageToken string       `json:"page_token"`
+	HasMore   bool         `json:"has_more"`
 }
 
 type LoginReq struct {
@@ -54,6 +123,50 @@ type LoginResp struct {
 	UserInfo UserInfo `json:"user_info"`
 }
 
+type MarkReadReq struct {
+	MessageIDs []uint64 `json:"message_ids"`
+}
+
+type MessageInfo struct {
+	MessageID uint64      `json:"message_id"`
+	CreatedAt string      `json:"created_at"`
+	Creator   CreatorInfo `json:"creator"`
+	Type      uint8       `json:"type"`
+	Content   string      `json:"content"`
+	IsRead    bool        `json:"is_read"`
+}
+
+type MessagePageToken struct {
+	ID uint64 `json:"id"`
+}
+
+type MomentInfo struct {
+	MomentID   uint64      `json:"moment_id"`
+	CreatedAt  string      `json:"created_at"`
+	UpdatedAt  string      `json:"updated_at"`
+	Creator    CreatorInfo `json:"creator"`
+	Type       uint8       `json:"type"`
+	Content    string      `json:"content,optional"`
+	VideoURL   string      `json:"video_url,optional"`
+	ImageURLs  []string    `json:"image_urls,optional"`
+	LikeNum    uint64      `json:"like_num"`
+	CommentNum uint64      `json:"comment_num"`
+	ShareNum   uint64      `json:"share_num"`
+	ViewNum    uint64      `json:"view_num"`
+	IsLiked    bool        `json:"is_liked"`
+}
+
+type MomentPageToken struct {
+	PageToken
+	HotScore float64 `json:"hot_score,optional"`
+}
+
+type PageToken struct {
+	ID        uint64 `json:"id"`
+	CreatedAt string `json:"created_at"` // 默认最新
+	SortType  uint8  `json:"sort_type"`  // 1. 最新
+}
+
 type RegisterReq struct {
 	Target   string `json:"target"`   // email or phone
 	Channel  int32  `json:"channel"`  // 1: email, 2: phone
@@ -62,6 +175,12 @@ type RegisterReq struct {
 }
 
 type Response struct {
+}
+
+type SendMessageReq struct {
+	ReceiverID uint64 `json:"receiver_id"`
+	Type       uint8  `json:"type"`
+	Content    string `json:"content"`
 }
 
 type SendVerificationCodeReq struct {
@@ -78,6 +197,10 @@ type ToggleLikeReq struct {
 type ToggleLikeResp struct {
 	Liked   bool   `json:"liked"`
 	LikeNum uint64 `json:"like_num"`
+}
+
+type UnreadCountResp struct {
+	Count int64 `json:"count"`
 }
 
 type UpdateUserInfoReq struct {

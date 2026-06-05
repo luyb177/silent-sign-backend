@@ -30,6 +30,16 @@ type (
 		Avatar    string `json:"avatar"`
 		CreatedAt string `json:"created_at"`
 	}
+	CreatorInfo {
+		UserID uint64 `json:"user_id"`
+		Name   string `json:"name"`
+		Avatar string `json:"avatar"`
+	}
+	PageToken {
+		ID        uint64 `json:"id"`
+		CreatedAt string `json:"created_at"` // 默认最新
+		SortType  uint8  `json:"sort_type"` // 1. 最新
+	}
 )
 
 // response
@@ -77,7 +87,7 @@ type (
 service silent_sign {
 	@doc "发送验证码"
 	@handler SendVerificationCode
-	get /send_code (SendVerificationCodeReq) returns (Response)
+	post /send_code (SendVerificationCodeReq) returns (Response)
 
 	@doc "注册账号"
 	@handler Register
@@ -112,7 +122,7 @@ type (
 service silent_sign {
 	@doc "修改用户信息"
 	@handler UpdateUserInfo
-	put /update_info (UpdateUserInfoReq) returns (Response)
+	post /update_info (UpdateUserInfoReq) returns (Response)
 
 	@doc "修改密码"
 	@handler ChangePassword
@@ -122,6 +132,29 @@ service silent_sign {
 // ══════════════════════════════════════════════
 // Momment 需 JWT
 // ══════════════════════════════════════════════
+// model
+type (
+	MomentInfo {
+		MomentID   uint64      `json:"moment_id"`
+		CreatedAt  string      `json:"created_at"`
+		UpdatedAt  string      `json:"updated_at"`
+		Creator    CreatorInfo `json:"creator"`
+		Type       uint8       `json:"type"`
+		Content    string      `json:"content,optional"`
+		VideoURL   string      `json:"video_url,optional"`
+		ImageURLs  []string    `json:"image_urls,optional"`
+		LikeNum    uint64      `json:"like_num"`
+		CommentNum uint64      `json:"comment_num"`
+		ShareNum   uint64      `json:"share_num"`
+		ViewNum    uint64      `json:"view_num"`
+		IsLiked    bool        `json:"is_liked"`
+	}
+	MomentPageToken {
+		PageToken
+		HotScore float64 `json:"hot_score,optional"`
+	}
+)
+
 // request
 type (
 	CreateMomentReq {
@@ -132,6 +165,26 @@ type (
 	}
 	DeleteMomentReq {
 		MomentID uint64 `json:"moment_id"`
+	}
+	GetMomentReq {
+		MomentID uint64 `form:"moment_id"`
+	}
+	ListMomentsReq {
+		PageSize  uint32 `form:"page_size"`
+		SortType  uint8  `form:"sort_type,optional"`
+		PageToken string `form:"page_token,optional"`
+	}
+)
+
+// response
+type (
+	GetMomentResp {
+		Moment MomentInfo `json:"moment"`
+	}
+	ListMomentsResp {
+		Moments   []MomentInfo `json:"moments"`
+		PageToken string       `json:"page_token"`
+		HasMore   bool         `json:"has_more"`
 	}
 )
 
@@ -149,11 +202,39 @@ service silent_sign {
 	@doc "删除动态"
 	@handler DeleteMoment
 	post /delete (DeleteMomentReq) returns (Response)
+
+	@doc "获取动态详情"
+	@handler GetMoment
+	get /get (GetMomentReq) returns (GetMomentResp)
+
+	@doc "分页获取动态列表"
+	@handler ListMoments
+	get /list (ListMomentsReq) returns (ListMomentsResp)
 }
 
 // ══════════════════════════════════════════════
 // Comment 需 JWT
 // ══════════════════════════════════════════════
+// model
+type (
+	CommentInfo {
+		CommentID uint64      `json:"comment_id"`
+		CreatedAt string      `json:"created_at"`
+		FatherID  uint64      `json:"father_id"` // 父评论ID，0表示一级评论
+		Creator   CreatorInfo `json:"creator"`
+		Location  string      `json:"location"`
+		Content   string      `json:"content"`
+		LikeNum   uint64      `json:"like_num"`
+		SubNum    uint64      `json:"sub_num"`
+		IsLiked   bool        `json:"is_liked"`
+	}
+	CommentPageToken {
+		PageToken
+		LikeNum uint64 `json:"like_num,optional"`
+		SubNum  uint64 `json:"sub_num,optional"`
+	}
+)
+
 // request
 type (
 	CreateCommentReq {
@@ -164,6 +245,22 @@ type (
 	}
 	DeleteCommentReq {
 		CommentID uint64 `json:"comment_id"`
+	}
+	ListCommentsReq {
+		TargetType uint8  `form:"target_type"`
+		TargetID   uint64 `form:"target_id"`
+		FatherID   uint64 `form:"father_id,optional"` // 0=父评论列表, >0=子评论列表
+		PageSize   uint32 `form:"page_size"`
+		PageToken  string `form:"page_token,optional"`
+	}
+)
+
+// response
+type (
+	ListCommentsResp {
+		Comments  []CommentInfo `json:"comments"`
+		PageToken string        `json:"page_token"`
+		HasMore   bool          `json:"has_more"`
 	}
 )
 
@@ -181,6 +278,10 @@ service silent_sign {
 	@doc "删除评论"
 	@handler DeleteComment
 	post /delete (DeleteCommentReq) returns (Response)
+
+	@doc "分页获取评论列表"
+	@handler ListComments
+	get /list (ListCommentsReq) returns (ListCommentsResp)
 }
 
 // ══════════════════════════════════════════════
@@ -212,5 +313,92 @@ service silent_sign {
 	@doc "点赞/取消点赞"
 	@handler ToggleLike
 	post /toggle (ToggleLikeReq) returns (ToggleLikeResp)
+}
+
+// ══════════════════════════════════════════════
+// Message 需 JWT
+// ══════════════════════════════════════════════
+// model
+type (
+	MessageInfo {
+		MessageID uint64      `json:"message_id"`
+		CreatedAt string      `json:"created_at"`
+		Creator   CreatorInfo `json:"creator"`
+		Type      uint8       `json:"type"`
+		Content   string      `json:"content"`
+		IsRead    bool        `json:"is_read"`
+	}
+	MessagePageToken {
+		ID uint64 `json:"id"`
+	}
+)
+
+// request
+type (
+	SendMessageReq {
+		ReceiverID uint64 `json:"receiver_id"`
+		Type       uint8  `json:"type"`
+		Content    string `json:"content"`
+	}
+	ListMessagesReq {
+		PageSize  uint32 `form:"page_size"`
+		PageToken string `form:"page_token,optional"`
+	}
+	MarkReadReq {
+		MessageIDs []uint64 `json:"message_ids"`
+	}
+)
+
+// response
+type (
+	ListMessagesResp {
+		Messages  []MessageInfo `json:"messages"`
+		PageToken string        `json:"page_token"`
+		HasMore   bool          `json:"has_more"`
+	}
+	UnreadCountResp {
+		Count int64 `json:"count"`
+	}
+)
+
+@server (
+	prefix:     /api/v1/message
+	tags:       "消息模块"
+	group:      message
+	middleware: JWTMiddleware,IPMiddleware
+)
+service silent_sign {
+	@doc "发送消息"
+	@handler SendMessage
+	post /send (SendMessageReq) returns (Response)
+
+	@doc "消息列表"
+	@handler ListMessages
+	get /list (ListMessagesReq) returns (ListMessagesResp)
+
+	@doc "标记已读"
+	@handler MarkRead
+	post /read (MarkReadReq) returns (Response)
+
+	@doc "未读消息数"
+	@handler UnreadCount
+	get /unread_count returns (UnreadCountResp)
+}
+
+// ══════════════════════════════════════════════
+// SSE 需 JWT
+// ══════════════════════════════════════════════
+@server (
+	sse:        true
+	prefix:     /api/v1/sse
+	tags:       "SSE推送"
+	group:      sse
+	middleware: JWTMiddleware
+	timeout:    0s
+)
+service silent_sign {
+	@doc "SSE 事件流"
+	@handler Events
+	get /events returns (Response)
 }
 

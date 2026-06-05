@@ -20,8 +20,20 @@ func EventsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/event-stream")
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+		w.Header().Set("X-Accel-Buffering", "no")
+		flusher.Flush()
+
 		ch := svcCtx.SSEHub.Register(authUser.UserID)
-		defer svcCtx.SSEHub.Unregister(authUser.UserID)
+		defer svcCtx.SSEHub.Unregister(authUser.UserID, ch)
 
 		for {
 			select {
@@ -32,9 +44,7 @@ func EventsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				if _, err := fmt.Fprintf(w, "data: %s\n\n", data); err != nil {
 					return
 				}
-				if flusher, ok := w.(http.Flusher); ok {
-					flusher.Flush()
-				}
+				flusher.Flush()
 			case <-r.Context().Done():
 				return
 			}

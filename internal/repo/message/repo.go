@@ -108,8 +108,22 @@ func (r *repo) IsGroupRead(ctx context.Context, messageID, userID uint64) (bool,
 func (r *repo) BatchIsGroupRead(ctx context.Context, messageID uint64, userIDs []uint64) (map[uint64]bool, error) {
 	key := groupReadKey(messageID)
 	result := make(map[uint64]bool, len(userIDs))
-	for _, uid := range userIDs {
-		ok, err := r.client.SIsMember(ctx, key, strconv.FormatUint(uid, 10)).Result()
+	if len(userIDs) == 0 {
+		return result, nil
+	}
+
+	pipe := r.client.Pipeline()
+	cmds := make([]*redis.BoolCmd, len(userIDs))
+	for i, uid := range userIDs {
+		cmds[i] = pipe.SIsMember(ctx, key, strconv.FormatUint(uid, 10))
+	}
+
+	if _, err := pipe.Exec(ctx); err != nil {
+		return nil, err
+	}
+
+	for i, uid := range userIDs {
+		ok, err := cmds[i].Result()
 		if err != nil {
 			return nil, err
 		}

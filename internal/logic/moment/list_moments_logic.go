@@ -64,8 +64,15 @@ func (l *ListMomentsLogic) ListMoments(req *types.ListMomentsReq) (resp *types.L
 		moments, err = l.svcCtx.Repos.Moment.ListByHot(l.ctx, pt.ID, pt.HotScore, limit)
 	default:
 		cursorTime := time.Time{}
+		if pt.ID != 0 && pt.CreatedAt == "" {
+			return nil, errorx.WrapBadRequest("分页参数无效", nil)
+		}
 		if pt.CreatedAt != "" {
-			cursorTime, _ = time.Parse(time.DateTime, pt.CreatedAt)
+			var parseErr error
+			cursorTime, parseErr = time.Parse(time.DateTime, pt.CreatedAt)
+			if parseErr != nil {
+				return nil, errorx.WrapBadRequest("分页参数无效", parseErr)
+			}
 		}
 		moments, err = l.svcCtx.Repos.Moment.ListByCreatedAt(l.ctx, pt.ID, cursorTime, limit)
 	}
@@ -90,13 +97,21 @@ func (l *ListMomentsLogic) ListMoments(req *types.ListMomentsReq) (resp *types.L
 	}
 
 	// 批量查用户
-	creatorMap, _ := l.svcCtx.Repos.User.FindByIDs(l.ctx, creatorIDs)
+	creatorMap, err := l.svcCtx.Repos.User.FindByIDs(l.ctx, creatorIDs)
+	if err != nil {
+		l.Errorf("find moment creators failed: %v", err)
+		return nil, errorx.WrapDBQuery("查找用户失败", err)
+	}
 
 	// 批量查是否点赞
 	likedSet := make(map[uint64]bool)
 	if authUser != nil {
 		for _, mid := range momentIDs {
-			liked, _ := l.svcCtx.Repos.Like.IsLiked(l.ctx, constvar.TargetTypeMoment, mid, authUser.UserID)
+			liked, likeErr := l.svcCtx.Repos.Like.IsLiked(l.ctx, constvar.TargetTypeMoment, mid, authUser.UserID)
+			if likeErr != nil {
+				l.Errorf("check moment is_liked failed (moment_id=%d): %v", mid, likeErr)
+				continue
+			}
 			likedSet[mid] = liked
 		}
 	}

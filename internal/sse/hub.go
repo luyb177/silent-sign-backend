@@ -31,12 +31,11 @@ func (h *Hub) Register(userID uint64) <-chan []byte {
 }
 
 // Unregister 移除用户的 SSE 通道并关闭
-func (h *Hub) Unregister(userID uint64) {
+func (h *Hub) Unregister(userID uint64, ch <-chan []byte) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-
-	if ch, ok := h.clients[userID]; ok {
-		close(ch)
+	if currentCh, ok := h.clients[userID]; ok && currentCh == ch {
+		close(currentCh)
 		delete(h.clients, userID)
 	}
 }
@@ -45,8 +44,8 @@ func (h *Hub) Unregister(userID uint64) {
 func (h *Hub) PushToUser(userID uint64, data []byte) {
 	h.mu.RLock()
 	ch, ok := h.clients[userID]
-	h.mu.RUnlock()
 	if !ok {
+		h.mu.RUnlock()
 		return
 	}
 	select {
@@ -54,4 +53,5 @@ func (h *Hub) PushToUser(userID uint64, data []byte) {
 	default:
 		// channel 满，丢弃（避免阻塞业务逻辑）
 	}
+	h.mu.RUnlock()
 }

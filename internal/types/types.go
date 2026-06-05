@@ -15,7 +15,7 @@ type ChangePasswordReq struct {
 type CommentInfo struct {
 	CommentID uint64      `json:"comment_id"`
 	CreatedAt string      `json:"created_at"`
-	FartherID uint64      `json:"farther_id"` // 父评论ID，0表示一级评论
+	FatherID  uint64      `json:"father_id"` // 父评论ID，0表示一级评论
 	Creator   CreatorInfo `json:"creator"`
 	Location  string      `json:"location"`
 	Content   string      `json:"content"`

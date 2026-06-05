@@ -74,8 +74,11 @@ func (l *ListMessagesLogic) ListMessages(req *types.ListMessagesReq) (resp *type
 			senderIDs = append(senderIDs, m.SenderID)
 		}
 	}
-	senderMap, _ := l.svcCtx.Repos.User.FindByIDs(l.ctx, senderIDs)
-
+	senderMap, err := l.svcCtx.Repos.User.FindByIDs(l.ctx, senderIDs)
+	if err != nil {
+		l.Errorf("find message senders failed: %v", err)
+		return nil, errorx.WrapDBQuery("查找用户失败", err)
+	}
 	// 7. 组装响应
 	messageInfos := make([]types.MessageInfo, 0, len(messages))
 	for _, m := range messages {

@@ -65,8 +65,15 @@ func (l *ListCommentsLogic) ListComments(req *types.ListCommentsReq) (resp *type
 		)
 	} else {
 		cursorTime := time.Time{}
+		if pt.ID != 0 && pt.CreatedAt == "" {
+			return nil, errorx.WrapBadRequest("分页参数无效", nil)
+		}
 		if pt.CreatedAt != "" {
-			cursorTime, _ = time.Parse(time.DateTime, pt.CreatedAt)
+			var parseErr error
+			cursorTime, parseErr = time.Parse(time.DateTime, pt.CreatedAt)
+			if parseErr != nil {
+				return nil, errorx.WrapBadRequest("分页参数无效", parseErr)
+			}
 		}
 		comments, err = l.svcCtx.Repos.Comment.ListByCreatedAtAsc(
 			l.ctx, req.TargetType, req.TargetID, req.FatherID,

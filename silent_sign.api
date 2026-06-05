@@ -35,6 +35,11 @@ type (
 		Name   string `json:"name"`
 		Avatar string `json:"avatar"`
 	}
+	PageToken {
+		ID        uint64 `json:"id"`
+		CreatedAt string `json:"created_at"` // 默认最新
+		SortType  uint8  `json:"sort_type"` // 1. 最新
+	}
 )
 
 // response
@@ -82,7 +87,7 @@ type (
 service silent_sign {
 	@doc "发送验证码"
 	@handler SendVerificationCode
-	get /send_code (SendVerificationCodeReq) returns (Response)
+	post /send_code (SendVerificationCodeReq) returns (Response)
 
 	@doc "注册账号"
 	@handler Register
@@ -117,7 +122,7 @@ type (
 service silent_sign {
 	@doc "修改用户信息"
 	@handler UpdateUserInfo
-	put /update_info (UpdateUserInfoReq) returns (Response)
+	post /update_info (UpdateUserInfoReq) returns (Response)
 
 	@doc "修改密码"
 	@handler ChangePassword
@@ -131,6 +136,7 @@ service silent_sign {
 type (
 	MomentInfo {
 		MomentID   uint64      `json:"moment_id"`
+		CreatedAt  string      `json:"created_at"`
 		UpdatedAt  string      `json:"updated_at"`
 		Creator    CreatorInfo `json:"creator"`
 		Type       uint8       `json:"type"`
@@ -142,6 +148,10 @@ type (
 		ShareNum   uint64      `json:"share_num"`
 		ViewNum    uint64      `json:"view_num"`
 		IsLiked    bool        `json:"is_liked"`
+	}
+	MomentPageToken {
+		PageToken
+		HotScore float64 `json:"hot_score,optional"`
 	}
 )
 
@@ -157,7 +167,12 @@ type (
 		MomentID uint64 `json:"moment_id"`
 	}
 	GetMomentReq {
-		MomentID uint64 `json:"moment_id"`
+		MomentID uint64 `form:"moment_id"`
+	}
+	ListMomentsReq {
+		PageSize  uint32 `form:"page_size"`
+		SortType  uint8  `form:"sort_type,optional"`
+		PageToken string `form:"page_token,optional"`
 	}
 )
 
@@ -165,6 +180,11 @@ type (
 type (
 	GetMomentResp {
 		Moment MomentInfo `json:"moment"`
+	}
+	ListMomentsResp {
+		Moments   []MomentInfo `json:"moments"`
+		PageToken string       `json:"page_token"`
+		HasMore   bool         `json:"has_more"`
 	}
 )
 
@@ -186,6 +206,10 @@ service silent_sign {
 	@doc "获取动态详情"
 	@handler GetMoment
 	get /get (GetMomentReq) returns (GetMomentResp)
+
+	@doc "分页获取动态列表"
+	@handler ListMoments
+	get /list (ListMomentsReq) returns (ListMomentsResp)
 }
 
 // ══════════════════════════════════════════════

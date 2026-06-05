@@ -35,7 +35,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					// 发送验证码
-					Method:  http.MethodGet,
+					Method:  http.MethodPost,
 					Path:    "/send_code",
 					Handler: auth.SendVerificationCodeHandler(serverCtx),
 				},
@@ -102,6 +102,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/get",
 					Handler: moment.GetMomentHandler(serverCtx),
 				},
+				{
+					// 分页获取动态列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: moment.ListMomentsHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/api/v1/moment"),
@@ -119,7 +125,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					// 修改用户信息
-					Method:  http.MethodPut,
+					Method:  http.MethodPost,
 					Path:    "/update_info",
 					Handler: user.UpdateUserInfoHandler(serverCtx),
 				},

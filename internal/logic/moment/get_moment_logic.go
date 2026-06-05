@@ -72,6 +72,7 @@ func (l *GetMomentLogic) GetMoment(req *types.GetMomentReq) (resp *types.GetMome
 	// 5. 组装响应
 	momentInfo := types.MomentInfo{
 		MomentID:   m.ID,
+		CreatedAt:  m.CreatedAt.Format(time.DateTime),
 		UpdatedAt:  m.UpdatedAt.Format(time.DateTime),
 		Type:       m.Type,
 		Content:    m.Content,

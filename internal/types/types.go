@@ -41,7 +41,7 @@ type DeleteMomentReq struct {
 }
 
 type GetMomentReq struct {
-	MomentID uint64 `json:"moment_id"`
+	MomentID uint64 `form:"moment_id"`
 }
 
 type GetMomentResp struct {
@@ -57,6 +57,18 @@ type IPLocation struct {
 	ISOCode  string `json:"iso_code"`
 }
 
+type ListMomentsReq struct {
+	PageSize  uint32 `form:"page_size"`
+	SortType  uint8  `form:"sort_type,optional"`
+	PageToken string `form:"page_token,optional"`
+}
+
+type ListMomentsResp struct {
+	Moments   []MomentInfo `json:"moments"`
+	PageToken string       `json:"page_token"`
+	HasMore   bool         `json:"has_more"`
+}
+
 type LoginReq struct {
 	Target   string `json:"target"`   // email or phone
 	Channel  int32  `json:"channel"`  // 1: email, 2: phone
@@ -70,6 +82,7 @@ type LoginResp struct {
 
 type MomentInfo struct {
 	MomentID   uint64      `json:"moment_id"`
+	CreatedAt  string      `json:"created_at"`
 	UpdatedAt  string      `json:"updated_at"`
 	Creator    CreatorInfo `json:"creator"`
 	Type       uint8       `json:"type"`
@@ -81,6 +94,17 @@ type MomentInfo struct {
 	ShareNum   uint64      `json:"share_num"`
 	ViewNum    uint64      `json:"view_num"`
 	IsLiked    bool        `json:"is_liked"`
+}
+
+type MomentPageToken struct {
+	PageToken
+	HotScore float64 `json:"hot_score,optional"`
+}
+
+type PageToken struct {
+	ID        uint64 `json:"id"`
+	CreatedAt string `json:"created_at"` // 默认最新
+	SortType  uint8  `json:"sort_type"`  // 1. 最新
 }
 
 type RegisterReq struct {

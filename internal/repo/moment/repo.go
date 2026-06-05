@@ -3,6 +3,7 @@ package moment
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -12,6 +13,8 @@ type Repository interface {
 	Create(ctx context.Context, m *Moment, tx ...*gorm.DB) error
 	Delete(ctx context.Context, userID, momentID uint64, tx ...*gorm.DB) error
 	FindByID(ctx context.Context, id uint64, tx ...*gorm.DB) (*Moment, error)
+	ListByCreatedAt(ctx context.Context, cursorID uint64, cursorTime time.Time, limit int, tx ...*gorm.DB) ([]*Moment, error)
+	ListByHot(ctx context.Context, cursorID uint64, cursorScore float64, limit int, tx ...*gorm.DB) ([]*Moment, error)
 	AdjustCommentNum(ctx context.Context, id uint64, delta int, tx ...*gorm.DB) error
 	AdjustLikeNum(ctx context.Context, id uint64, delta int, tx ...*gorm.DB) error
 	SetLikeNum(ctx context.Context, id uint64, count int64, tx ...*gorm.DB) error
@@ -115,4 +118,37 @@ func (r *repo) SetLikeNum(ctx context.Context, id uint64, count int64, tx ...*go
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+// ListByCreatedAt 按创建时间倒序游标分页（最新在前）
+// cursorTime 为空时查首页
+func (r *repo) ListByCreatedAt(ctx context.Context, cursorID uint64, cursorTime time.Time, limit int, tx ...*gorm.DB) ([]*Moment, error) {
+	db := r.getDB(ctx, tx...)
+	var moments []*Moment
+
+	if cursorID == 0 {
+		err := db.Order("created_at DESC, id DESC").Limit(limit).Find(&moments).Error
+		return moments, err
+	}
+
+	err := db.Where(
+		"created_at < ? OR (created_at = ? AND id < ?)", cursorTime, cursorTime, cursorID,
+	).Order("created_at DESC, id DESC").Limit(limit).Find(&moments).Error
+	return moments, err
+}
+
+// ListByHot 按热度倒序游标分页
+func (r *repo) ListByHot(ctx context.Context, cursorID uint64, cursorScore float64, limit int, tx ...*gorm.DB) ([]*Moment, error) {
+	db := r.getDB(ctx, tx...)
+	var moments []*Moment
+
+	if cursorID == 0 {
+		err := db.Order("hot_score DESC, id DESC").Limit(limit).Find(&moments).Error
+		return moments, err
+	}
+
+	err := db.Where(
+		"hot_score < ? OR (hot_score = ? AND id < ?)", cursorScore, cursorScore, cursorID,
+	).Order("hot_score DESC, id DESC").Limit(limit).Find(&moments).Error
+	return moments, err
 }

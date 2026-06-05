@@ -215,6 +215,12 @@ service silent_sign {
 // ══════════════════════════════════════════════
 // Comment 需 JWT
 // ══════════════════════════════════════════════
+// model
+type CommentInfo struct {
+
+}
+
+
 // request
 type (
 	CreateCommentReq {

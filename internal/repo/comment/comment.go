@@ -21,6 +21,7 @@ type Comment struct {
 
 	// 冗余字段
 	LikeNum uint64
+	SubNum  uint64
 }
 
 func (Comment) TableName() string {

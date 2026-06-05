@@ -9,6 +9,7 @@ import (
 
 	auth "github.com/luyb177/silent-sign-backend/internal/handler/auth"
 	comment "github.com/luyb177/silent-sign-backend/internal/handler/comment"
+	friend "github.com/luyb177/silent-sign-backend/internal/handler/friend"
 	like "github.com/luyb177/silent-sign-backend/internal/handler/like"
 	message "github.com/luyb177/silent-sign-backend/internal/handler/message"
 	moment "github.com/luyb177/silent-sign-backend/internal/handler/moment"
@@ -72,6 +73,51 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			}...,
 		),
 		rest.WithPrefix("/api/v1/comment"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
+			[]rest.Route{
+				{
+					// 通过好友申请
+					Method:  http.MethodPost,
+					Path:    "/accept",
+					Handler: friend.AcceptFriendRequestHandler(serverCtx),
+				},
+				{
+					// 删除好友
+					Method:  http.MethodPost,
+					Path:    "/delete",
+					Handler: friend.DeleteFriendHandler(serverCtx),
+				},
+				{
+					// 好友列表
+					Method:  http.MethodGet,
+					Path:    "/list",
+					Handler: friend.ListFriendsHandler(serverCtx),
+				},
+				{
+					// 拒绝好友申请
+					Method:  http.MethodPost,
+					Path:    "/reject",
+					Handler: friend.RejectFriendRequestHandler(serverCtx),
+				},
+				{
+					// 发送好友申请
+					Method:  http.MethodPost,
+					Path:    "/request",
+					Handler: friend.SendFriendRequestHandler(serverCtx),
+				},
+				{
+					// 待处理申请列表
+					Method:  http.MethodGet,
+					Path:    "/requests",
+					Handler: friend.ListFriendRequestsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1/friend"),
 	)
 
 	server.AddRoutes(

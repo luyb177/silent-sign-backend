@@ -2,6 +2,8 @@ package repo
 
 import (
 	"github.com/luyb177/silent-sign-backend/internal/repo/comment"
+	"github.com/luyb177/silent-sign-backend/internal/repo/friend"
+	friendrequest "github.com/luyb177/silent-sign-backend/internal/repo/friend_request"
 	"github.com/luyb177/silent-sign-backend/internal/repo/image"
 	"github.com/luyb177/silent-sign-backend/internal/repo/like"
 	"github.com/luyb177/silent-sign-backend/internal/repo/message"
@@ -13,27 +15,31 @@ import (
 )
 
 type Repositories struct {
-	Verify  verify.Repository
-	User    user.Repository
-	Moment  moment.Repository
-	Image   image.Repository
-	Comment comment.Repository
-	Like    like.Repository
-	Message message.Repository
-	db      *gorm.DB
+	Verify        verify.Repository
+	User          user.Repository
+	Moment        moment.Repository
+	Image         image.Repository
+	Comment       comment.Repository
+	Like          like.Repository
+	Message       message.Repository
+	FriendRequest friendrequest.Repository
+	Friend        friend.Repository
+	db            *gorm.DB
 }
 
 // NewRepositories creates Repositories with both Redis and MySQL.
 func NewRepositories(redisClient *redis.Client, db *gorm.DB) *Repositories {
 	return &Repositories{
-		Verify:  verify.NewVerifyRepo(redisClient),
-		User:    user.NewRepository(redisClient, db),
-		Moment:  moment.NewRepository(db, redisClient),
-		Image:   image.NewRepository(db, redisClient),
-		Comment: comment.NewRepository(db, redisClient),
-		Like:    like.NewRepository(db, redisClient),
-		Message: message.NewRepository(db, redisClient),
-		db:      db,
+		Verify:        verify.NewVerifyRepo(redisClient),
+		User:          user.NewRepository(redisClient, db),
+		Moment:        moment.NewRepository(db, redisClient),
+		Image:         image.NewRepository(db, redisClient),
+		Comment:       comment.NewRepository(db, redisClient),
+		Like:          like.NewRepository(db, redisClient),
+		Message:       message.NewRepository(db, redisClient),
+		FriendRequest: friendrequest.NewRepository(db, redisClient),
+		Friend:        friend.NewRepository(db, redisClient),
+		db:            db,
 	}
 }
 

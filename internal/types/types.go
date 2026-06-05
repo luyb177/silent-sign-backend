@@ -54,8 +54,26 @@ type DeleteCommentReq struct {
 	CommentID uint64 `json:"comment_id"`
 }
 
+type DeleteFriendReq struct {
+	FriendID uint64 `json:"friend_id"`
+}
+
 type DeleteMomentReq struct {
 	MomentID uint64 `json:"moment_id"`
+}
+
+type FriendInfo struct {
+	FriendID  uint64      `json:"friend_id"`
+	CreatedAt string      `json:"created_at"`
+	User      CreatorInfo `json:"user"`
+}
+
+type FriendRequestInfo struct {
+	RequestID uint64      `json:"request_id"`
+	CreatedAt string      `json:"created_at"`
+	FromUser  CreatorInfo `json:"from_user"`
+	ToUser    CreatorInfo `json:"to_user"`
+	Status    uint8       `json:"status"`
 }
 
 type GetMomentReq struct {
@@ -64,6 +82,10 @@ type GetMomentReq struct {
 
 type GetMomentResp struct {
 	Moment MomentInfo `json:"moment"`
+}
+
+type HandleFriendRequestReq struct {
+	RequestID uint64 `json:"request_id"`
 }
 
 type IPLocation struct {
@@ -87,6 +109,28 @@ type ListCommentsResp struct {
 	Comments  []CommentInfo `json:"comments"`
 	PageToken string        `json:"page_token"`
 	HasMore   bool          `json:"has_more"`
+}
+
+type ListFriendRequestsReq struct {
+	PageSize  uint32 `form:"page_size"`
+	PageToken string `form:"page_token,optional"`
+}
+
+type ListFriendRequestsResp struct {
+	Requests  []FriendRequestInfo `json:"requests"`
+	PageToken string              `json:"page_token"`
+	HasMore   bool                `json:"has_more"`
+}
+
+type ListFriendsReq struct {
+	PageSize  uint32 `form:"page_size"`
+	PageToken string `form:"page_token,optional"`
+}
+
+type ListFriendsResp struct {
+	Friends   []FriendInfo `json:"friends"`
+	PageToken string       `json:"page_token"`
+	HasMore   bool         `json:"has_more"`
 }
 
 type ListMessagesReq struct {
@@ -175,6 +219,10 @@ type RegisterReq struct {
 }
 
 type Response struct {
+}
+
+type SendFriendRequestReq struct {
+	ToUserID uint64 `json:"to_user_id"`
 }
 
 type SendMessageReq struct {

@@ -385,3 +385,20 @@ service silent_sign {
 	get /unread_count returns (UnreadCountResp)
 }
 
+// ══════════════════════════════════════════════
+// SSE 需 JWT
+// ══════════════════════════════════════════════
+@server (
+	sse:        true
+	prefix:     /api/v1/sse
+	tags:       "SSE推送"
+	group:      sse
+	middleware: JWTMiddleware
+	timeout:    0s
+)
+service silent_sign {
+	@doc "SSE 事件流"
+	@handler Events
+	get /events returns (Response)
+}
+

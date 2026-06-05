@@ -68,12 +68,20 @@ type FriendInfo struct {
 	User      CreatorInfo `json:"user"`
 }
 
+type FriendPageToken struct {
+	ID uint64 `json:"id"`
+}
+
 type FriendRequestInfo struct {
 	RequestID uint64      `json:"request_id"`
 	CreatedAt string      `json:"created_at"`
 	FromUser  CreatorInfo `json:"from_user"`
 	ToUser    CreatorInfo `json:"to_user"`
 	Status    uint8       `json:"status"`
+}
+
+type FriendRequestPageToken struct {
+	ID uint64 `json:"id"`
 }
 
 type GetMomentReq struct {

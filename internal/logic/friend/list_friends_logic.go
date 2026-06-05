@@ -5,12 +5,12 @@ package friend
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/luyb177/silent-sign-backend/common/errorx"
 	"github.com/luyb177/silent-sign-backend/internal/constvar"
 	"github.com/luyb177/silent-sign-backend/internal/middleware"
+	"github.com/luyb177/silent-sign-backend/internal/pkg/pagetoken"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 	"github.com/luyb177/silent-sign-backend/internal/types"
 
@@ -46,35 +46,38 @@ func (l *ListFriendsLogic) ListFriends(req *types.ListFriendsReq) (resp *types.L
 	}
 	limit := int(pageSize) + 1
 
-	var cursorID uint64
+	// 3. 解析 page_token
+	var pt types.FriendPageToken
 	if req.PageToken != "" {
-		cursorID, err = strconv.ParseUint(req.PageToken, 10, 64)
-		if err != nil {
+		if err := pagetoken.Decode(req.PageToken, constvar.FriendPageTokenPrefix, &pt); err != nil {
 			return nil, errorx.WrapBadRequest("分页参数无效", err)
 		}
 	}
 
-	// 3. 查询好友列表
-	friends, err := l.svcCtx.Repos.Friend.ListByUser(l.ctx, authUser.UserID, limit, cursorID)
+	// 4. 查询好友列表
+	friends, err := l.svcCtx.Repos.Friend.ListByUser(l.ctx, authUser.UserID, limit, pt.ID)
 	if err != nil {
 		l.Errorf("list friends failed: %v", err)
 		return nil, errorx.WrapDBQuery("查询好友列表失败", err)
 	}
 
-	// 4. 判断 has_more
+	// 5. 判断 has_more
 	hasMore := len(friends) > int(pageSize)
 	if hasMore {
 		friends = friends[:pageSize]
 	}
 
-	// 5. 批量查好友用户信息
+	// 6. 批量查好友用户信息
 	friendIDs := make([]uint64, 0, len(friends))
 	for _, f := range friends {
 		friendIDs = append(friendIDs, f.FriendID)
 	}
-	userMap, _ := l.svcCtx.Repos.User.FindByIDs(l.ctx, friendIDs)
+	userMap, err := l.svcCtx.Repos.User.FindByIDs(l.ctx, friendIDs)
+	if err != nil {
+		l.Errorf("find users failed: %v", err)
+	}
 
-	// 6. 组装响应
+	// 7. 组装响应
 	friendInfos := make([]types.FriendInfo, 0, len(friends))
 	for _, f := range friends {
 		fi := types.FriendInfo{
@@ -87,11 +90,12 @@ func (l *ListFriendsLogic) ListFriends(req *types.ListFriendsReq) (resp *types.L
 		friendInfos = append(friendInfos, fi)
 	}
 
-	// 7. 下一页 token
+	// 8. 生成下一页 token
 	nextToken := ""
 	if hasMore {
 		last := friends[len(friends)-1]
-		nextToken = strconv.FormatUint(last.ID, 10)
+		nextPT := types.FriendPageToken{ID: last.ID}
+		nextToken, _ = pagetoken.Encode(constvar.FriendPageTokenPrefix, &nextPT)
 	}
 
 	return &types.ListFriendsResp{

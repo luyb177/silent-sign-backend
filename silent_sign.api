@@ -414,10 +414,16 @@ type (
 		ToUser    CreatorInfo `json:"to_user"`
 		Status    uint8       `json:"status"`
 	}
+	FriendRequestPageToken {
+		ID uint64 `json:"id"`
+	}
 	FriendInfo {
 		FriendID  uint64      `json:"friend_id"`
 		CreatedAt string      `json:"created_at"`
 		User      CreatorInfo `json:"user"`
+	}
+	FriendPageToken {
+		ID uint64 `json:"id"`
 	}
 )
 

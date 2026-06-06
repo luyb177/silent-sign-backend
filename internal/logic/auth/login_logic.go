@@ -70,12 +70,20 @@ func (l *LoginLogic) loginByEmail(target string, req *types.LoginReq) (*types.Lo
 		return nil, errorx.WrapBadRequest("密码错误", nil)
 	}
 
-	// 3. 生成 JWT
-	token, err := l.svcCtx.JWTHandler.SetJWTToken(jwtx.ClaimsParams{
+	// 3. 生成 JWT（access + refresh）
+	accessToken, err := l.svcCtx.JWTHandler.SetAccessToken(jwtx.ClaimsParams{
 		UserID: u.ID,
 	})
 	if err != nil {
-		l.Errorf("generate jwt failed: %v", err)
+		l.Errorf("generate access token failed: %v", err)
+		return nil, errorx.WrapInternal("生成令牌失败", err)
+	}
+
+	refreshToken, err := l.svcCtx.JWTHandler.SetRefreshToken(jwtx.ClaimsParams{
+		UserID: u.ID,
+	})
+	if err != nil {
+		l.Errorf("generate refresh token failed: %v", err)
 		return nil, errorx.WrapInternal("生成令牌失败", err)
 	}
 
@@ -88,8 +96,9 @@ func (l *LoginLogic) loginByEmail(target string, req *types.LoginReq) (*types.Lo
 	}(target, u.Name)
 
 	return &types.LoginResp{
-		Token:    token,
-		UserInfo: l.buildUserInfo(u),
+		Token:        accessToken,
+		RefreshToken: refreshToken,
+		UserInfo:     l.buildUserInfo(u),
 	}, nil
 }
 

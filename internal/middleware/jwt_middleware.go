@@ -50,6 +50,12 @@ func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		// 仅允许 access token 访问业务接口，拒绝 refresh token
+		if claims.TokenType != jwtx.TokenTypeAccess {
+			respx.ErrorCtx(r.Context(), w, errorx.ErrTokenInvalid)
+			return
+		}
+
 		u := &types.AuthUser{
 			UserID: claims.UserID,
 		}

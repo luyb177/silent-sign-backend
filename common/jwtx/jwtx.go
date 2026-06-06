@@ -9,6 +9,12 @@ import (
 
 const defaultLeeway = 1 * time.Minute
 
+// TokenType 常量，用于区分访问令牌和刷新令牌
+const (
+	TokenTypeAccess  = "access"
+	TokenTypeRefresh = "refresh"
+)
+
 type Claims struct {
 	ClaimsParams
 	jwtv5.RegisteredClaims
@@ -20,33 +26,50 @@ type ClaimsParams struct {
 }
 
 type Handler interface {
-	SetJWTToken(claims ClaimsParams) (string, error)
+	SetAccessToken(claims ClaimsParams) (string, error)
+	SetRefreshToken(claims ClaimsParams) (string, error)
 	ParseJWTToken(tokenString string) (*Claims, error)
 }
 
 type HandlerImpl struct {
-	Secret      []byte
-	TokenExpire time.Duration
-	Leeway      time.Duration
+	Secret        []byte
+	AccessExpire  time.Duration
+	RefreshExpire time.Duration
+	Leeway        time.Duration
 }
 
-func NewHandler(secret string, expire time.Duration) (Handler, error) {
+func NewHandler(secret string, accessExpire, refreshExpire time.Duration) (Handler, error) {
 	if secret == "" {
 		return nil, errors.New("jwt secret cannot be empty")
 	}
 
-	if expire <= 0 {
-		return nil, errors.New("jwt expire must be positive")
+	if accessExpire <= 0 {
+		return nil, errors.New("jwt access expire must be positive")
+	}
+
+	if refreshExpire <= 0 {
+		return nil, errors.New("jwt refresh expire must be positive")
 	}
 
 	return &HandlerImpl{
-		Secret:      []byte(secret),
-		TokenExpire: expire,
-		Leeway:      defaultLeeway,
+		Secret:        []byte(secret),
+		AccessExpire:  accessExpire,
+		RefreshExpire: refreshExpire,
+		Leeway:        defaultLeeway,
 	}, nil
 }
 
-func (h *HandlerImpl) SetJWTToken(claimsParams ClaimsParams) (string, error) {
+func (h *HandlerImpl) SetAccessToken(claimsParams ClaimsParams) (string, error) {
+	claimsParams.TokenType = TokenTypeAccess
+	return h.signToken(claimsParams, h.AccessExpire)
+}
+
+func (h *HandlerImpl) SetRefreshToken(claimsParams ClaimsParams) (string, error) {
+	claimsParams.TokenType = TokenTypeRefresh
+	return h.signToken(claimsParams, h.RefreshExpire)
+}
+
+func (h *HandlerImpl) signToken(claimsParams ClaimsParams, expire time.Duration) (string, error) {
 	now := time.Now()
 
 	claims := Claims{
@@ -54,7 +77,7 @@ func (h *HandlerImpl) SetJWTToken(claimsParams ClaimsParams) (string, error) {
 		RegisteredClaims: jwtv5.RegisteredClaims{
 			IssuedAt:  jwtv5.NewNumericDate(now),
 			NotBefore: jwtv5.NewNumericDate(now),
-			ExpiresAt: jwtv5.NewNumericDate(now.Add(h.TokenExpire)),
+			ExpiresAt: jwtv5.NewNumericDate(now.Add(expire)),
 		},
 	}
 

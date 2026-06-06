@@ -68,13 +68,21 @@ type (
 		Channel  int32  `json:"channel"` // 1: email, 2: phone
 		Password string `json:"password"` // 密码
 	}
+	RefreshTokenReq {
+		RefreshToken string `json:"refresh_token"`
+	}
 )
 
 // response
 type (
 	LoginResp {
-		Token    string   `json:"token"`
-		UserInfo UserInfo `json:"user_info"`
+		Token        string   `json:"token"`
+		RefreshToken string   `json:"refresh_token"`
+		UserInfo     UserInfo `json:"user_info"`
+	}
+	RefreshTokenResp {
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 )
 
@@ -96,6 +104,10 @@ service silent_sign {
 	@doc "登录账号"
 	@handler Login
 	post /login (LoginReq) returns (LoginResp)
+
+	@doc "刷新令牌"
+	@handler RefreshToken
+	post /refresh (RefreshTokenReq) returns (RefreshTokenResp)
 }
 
 // ══════════════════════════════════════════════

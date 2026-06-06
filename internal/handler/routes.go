@@ -38,6 +38,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: auth.RegisterHandler(serverCtx),
 				},
 				{
+					// 刷新令牌
+					Method:  http.MethodPost,
+					Path:    "/refresh",
+					Handler: auth.RefreshTokenHandler(serverCtx),
+				},
+				{
 					// 发送验证码
 					Method:  http.MethodPost,
 					Path:    "/send_code",

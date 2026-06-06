@@ -171,8 +171,18 @@ type LoginReq struct {
 }
 
 type LoginResp struct {
-	Token    string   `json:"token"`
-	UserInfo UserInfo `json:"user_info"`
+	Token        string   `json:"token"`
+	RefreshToken string   `json:"refresh_token"`
+	UserInfo     UserInfo `json:"user_info"`
+}
+
+type RefreshTokenReq struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshTokenResp struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type MarkReadReq struct {

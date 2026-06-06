@@ -22,8 +22,9 @@ type Config struct {
 }
 
 type JWTConf struct {
-	Secret  string
-	ExpireS int64 // 过期时间，单位：秒
+	Secret         string
+	ExpireS        int64 // access token 过期时间，单位：秒，默认 900（15min）
+	RefreshExpireS int64 // refresh token 过期时间，单位：秒，默认 604800（7d）
 }
 
 type RedisConf struct {

@@ -66,6 +66,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "refresh_token": {
+                  "type": "string"
+                },
                 "token": {
                   "type": "string"
                 },
@@ -95,6 +98,58 @@
                       "type": "string"
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "认证模块"
+        ],
+        "summary": "刷新令牌",
+        "operationId": "authRefreshToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "refresh_token"
+              ],
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
                 }
               }
             }
@@ -1541,7 +1596,7 @@
       }
     }
   },
-  "x-date": "2026-06-06 10:38:04",
+  "x-date": "2026-06-06 11:44:41",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

@@ -54,10 +54,13 @@ func NewClient(userID uint64, hub *Hub, repos *repo.Repositories, conn *websocke
 	}
 }
 
-// Close 安全关闭 Client（仅通知退出，不关闭 send channel）
+// Close 安全关闭 Client：通知 WritePump 退出 + 关闭底层 WebSocket 连接，触发 ReadPump 退出
 func (c *Client) Close() {
 	c.closeOnce.Do(func() {
 		close(c.closeChan)
+		// 发送关闭帧后关闭连接，让 ReadPump 的 ReadMessage 返回错误从而退出
+		_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		c.conn.Close()
 	})
 }
 
@@ -103,9 +106,15 @@ func (c *Client) WritePump() {
 	for {
 		select {
 		case data, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if !ok {
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				err := c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					return
+				}
 				return
 			}
 			if err := c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
@@ -114,7 +123,10 @@ func (c *Client) WritePump() {
 		case <-c.closeChan:
 			return
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err != nil {
+				return
+			}
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}

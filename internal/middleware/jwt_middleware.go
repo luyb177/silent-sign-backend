@@ -5,14 +5,17 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 
+	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/luyb177/silent-sign-backend/common/errorx"
 	"github.com/luyb177/silent-sign-backend/common/jwtx"
 	"github.com/luyb177/silent-sign-backend/common/respx"
 	"github.com/luyb177/silent-sign-backend/internal/constvar"
 	"github.com/luyb177/silent-sign-backend/internal/types"
+
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -39,7 +42,11 @@ func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		claims, err := m.handler.ParseJWTToken(token)
 		if err != nil {
 			m.Errorf("ParseJWTToken 解析token失败: %v", err)
-			respx.ErrorCtx(r.Context(), w, errorx.Wrap(errorx.CodeUnauthorized, "token令牌无效", err))
+			if errors.Is(err, jwtv5.ErrTokenExpired) {
+				respx.ErrorCtx(r.Context(), w, errorx.ErrTokenExpired)
+			} else {
+				respx.ErrorCtx(r.Context(), w, errorx.ErrTokenInvalid)
+			}
 			return
 		}
 
@@ -55,15 +62,24 @@ func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 
 // 裸 token / Bearer token
 func parseAuthorizationToken(h http.Header) string {
-	s := strings.TrimSpace(h.Get("Authorization"))
-	if s == "" {
+	auth := strings.TrimSpace(h.Get("Authorization"))
+	if auth == "" {
 		return ""
 	}
-	const prefix = "Bearer "
-	if len(s) > len(prefix) && strings.EqualFold(s[:len(prefix)], prefix) {
-		return strings.TrimSpace(s[len(prefix):])
+
+	parts := strings.Fields(auth)
+
+	switch len(parts) {
+	case 1:
+		return parts[0]
+
+	case 2:
+		if strings.EqualFold(parts[0], "Bearer") {
+			return parts[1]
+		}
 	}
-	return s
+
+	return ""
 }
 
 // GetAuthUser 从 context 中获取 AuthUser

@@ -2,11 +2,12 @@ package jwtx
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 )
+
+const defaultLeeway = 1 * time.Minute
 
 type Claims struct {
 	ClaimsParams
@@ -14,7 +15,8 @@ type Claims struct {
 }
 
 type ClaimsParams struct {
-	UserID uint64 `json:"user_id"`
+	UserID    uint64 `json:"user_id"`
+	TokenType string `json:"token_type"`
 }
 
 type Handler interface {
@@ -25,37 +27,69 @@ type Handler interface {
 type HandlerImpl struct {
 	Secret      []byte
 	TokenExpire time.Duration
+	Leeway      time.Duration
 }
 
-func NewHandler(secret string, expire time.Duration) Handler {
+func NewHandler(secret string, expire time.Duration) (Handler, error) {
+	if secret == "" {
+		return nil, errors.New("jwt secret cannot be empty")
+	}
+
+	if expire <= 0 {
+		return nil, errors.New("jwt expire must be positive")
+	}
+
 	return &HandlerImpl{
 		Secret:      []byte(secret),
 		TokenExpire: expire,
-	}
+		Leeway:      defaultLeeway,
+	}, nil
 }
 
 func (h *HandlerImpl) SetJWTToken(claimsParams ClaimsParams) (string, error) {
+	now := time.Now()
+
 	claims := Claims{
 		ClaimsParams: claimsParams,
 		RegisteredClaims: jwtv5.RegisteredClaims{
-			ExpiresAt: jwtv5.NewNumericDate(time.Now().Add(h.TokenExpire)),
+			IssuedAt:  jwtv5.NewNumericDate(now),
+			NotBefore: jwtv5.NewNumericDate(now),
+			ExpiresAt: jwtv5.NewNumericDate(now.Add(h.TokenExpire)),
 		},
 	}
-	token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, &claims)
+
+	token := jwtv5.NewWithClaims(
+		jwtv5.SigningMethodHS256,
+		claims,
+	)
+
 	return token.SignedString(h.Secret)
 }
 
 func (h *HandlerImpl) ParseJWTToken(tokenString string) (*Claims, error) {
-	token, err := jwtv5.ParseWithClaims(
+	leeway := h.Leeway
+	if leeway <= 0 {
+		leeway = defaultLeeway
+	}
+
+	parser := jwtv5.NewParser(
+		jwtv5.WithLeeway(leeway),
+		jwtv5.WithExpirationRequired(),
+		jwtv5.WithValidMethods(
+			[]string{
+				jwtv5.SigningMethodHS256.Alg(),
+			},
+		),
+	)
+
+	token, err := parser.ParseWithClaims(
 		tokenString,
 		&Claims{},
-		func(token *jwtv5.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwtv5.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Method.Alg())
-			}
+		func(token *jwtv5.Token) (any, error) {
 			return h.Secret, nil
 		},
 	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -64,5 +98,6 @@ func (h *HandlerImpl) ParseJWTToken(tokenString string) (*Claims, error) {
 	if !ok || !token.Valid {
 		return nil, errors.New("invalid token")
 	}
+
 	return claims, nil
 }

@@ -456,6 +456,7 @@ type (
 	ListFriendRequestsReq {
 		PageSize  uint32 `form:"page_size"`
 		PageToken string `form:"page_token,optional"`
+		Status    uint8  `form:"status,optional"` // 筛选状态：0=全部，1=pending，2=accepted，3=rejected
 	}
 	ListFriendsReq {
 		PageSize  uint32 `form:"page_size"`
@@ -500,7 +501,7 @@ service silent_sign {
 	@handler DeleteFriend
 	post /delete (DeleteFriendReq) returns (Response)
 
-	@doc "待处理申请列表"
+	@doc "好友申请列表（支持按状态筛选，不传则返回全部）"
 	@handler ListFriendRequests
 	get /requests (ListFriendRequestsReq) returns (ListFriendRequestsResp)
 

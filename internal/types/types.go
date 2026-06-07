@@ -126,6 +126,7 @@ type ListCommentsResp struct {
 type ListFriendRequestsReq struct {
 	PageSize  uint32 `form:"page_size"`
 	PageToken string `form:"page_token,optional"`
+	Status    uint8  `form:"status,optional"` // 筛选状态：0=全部，1=pending，2=accepted，3=rejected
 }
 
 type ListFriendRequestsResp struct {

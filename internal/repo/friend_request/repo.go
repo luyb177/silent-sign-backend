@@ -15,6 +15,8 @@ type Repository interface {
 	FindPending(ctx context.Context, fromUserID, toUserID uint64, tx ...*gorm.DB) (*FriendRequest, error)
 	UpdateStatus(ctx context.Context, id uint64, status uint8, tx ...*gorm.DB) error
 	ListPendingToUser(ctx context.Context, toUserID uint64, limit int, cursorID uint64, tx ...*gorm.DB) ([]*FriendRequest, error)
+	// ListToUser 查询发给某用户的好友申请（支持按状态筛选，0 表示全部）
+	ListToUser(ctx context.Context, toUserID uint64, status uint8, limit int, cursorID uint64, tx ...*gorm.DB) ([]*FriendRequest, error)
 }
 
 type repo struct {
@@ -66,6 +68,22 @@ func (r *repo) ListPendingToUser(ctx context.Context, toUserID uint64, limit int
 	var requests []*FriendRequest
 
 	query := db.Where("to_user_id = ? AND status = ?", toUserID, constvar.FriendRequestStatusPending)
+	if cursorID != 0 {
+		query = query.Where("id < ?", cursorID)
+	}
+	err := query.Order("id DESC").Limit(limit).Find(&requests).Error
+	return requests, err
+}
+
+// ListToUser 查询发给某用户的好友申请（支持按状态筛选，status=0 表示全部，按时间倒序游标分页）
+func (r *repo) ListToUser(ctx context.Context, toUserID uint64, status uint8, limit int, cursorID uint64, tx ...*gorm.DB) ([]*FriendRequest, error) {
+	db := r.getDB(ctx, tx...)
+	var requests []*FriendRequest
+
+	query := db.Where("to_user_id = ?", toUserID)
+	if status != 0 {
+		query = query.Where("status = ?", status)
+	}
 	if cursorID != 0 {
 		query = query.Where("id < ?", cursorID)
 	}

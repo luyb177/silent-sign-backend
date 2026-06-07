@@ -14,7 +14,7 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-// ListFriendRequestsHandler 待处理申请列表
+// ListFriendRequestsHandler 好友申请列表（支持按状态筛选）
 func ListFriendRequestsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ListFriendRequestsReq

@@ -116,7 +116,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: friend.SendFriendRequestHandler(serverCtx),
 				},
 				{
-					// 待处理申请列表
+					// 好友申请列表（支持按状态筛选，不传则返回全部）
 					Method:  http.MethodGet,
 					Path:    "/requests",
 					Handler: friend.ListFriendRequestsHandler(serverCtx),

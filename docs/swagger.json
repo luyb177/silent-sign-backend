@@ -321,7 +321,12 @@
           "200": {
             "description": "",
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
@@ -768,7 +773,7 @@
         "tags": [
           "好友模块"
         ],
-        "summary": "待处理申请列表",
+        "summary": "好友申请列表（支持按状态筛选，不传则返回全部）",
         "operationId": "friendListFriendRequests",
         "parameters": [
           {
@@ -780,6 +785,13 @@
           {
             "type": "string",
             "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "筛选状态：0=全部，1=pending，2=accepted，3=rejected",
+            "name": "status",
             "in": "query",
             "allowEmptyValue": true
           }
@@ -1192,7 +1204,12 @@
           "200": {
             "description": "",
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
@@ -1596,7 +1613,7 @@
       }
     }
   },
-  "x-date": "2026-06-06 11:44:41",
+  "x-date": "2026-06-07 16:36:27",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

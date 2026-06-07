@@ -358,6 +358,8 @@ type (
 	ListMessagesReq {
 		PageSize  uint32 `form:"page_size"`
 		PageToken string `form:"page_token,optional"`
+		PartnerID uint64 `form:"partner_id,optional"` // 对话方用户ID，筛选两人之间的私聊记录
+		Type      uint8  `form:"type,optional"` // 消息类型筛选，0=全部
 	}
 	MarkReadReq {
 		MessageIDs []uint64 `json:"message_ids"`
@@ -387,7 +389,7 @@ service silent_sign {
 	@handler SendMessage
 	post /send (SendMessageReq) returns (Response)
 
-	@doc "消息列表"
+	@doc "消息列表（支持按聊天对象/类型筛选历史记录）"
 	@handler ListMessages
 	get /list (ListMessagesReq) returns (ListMessagesResp)
 
@@ -487,7 +489,7 @@ type (
 service silent_sign {
 	@doc "发送好友申请"
 	@handler SendFriendRequest
-	post /request (SendFriendRequestReq) returns (Response)
+	post /request (SendFriendRequestReq) returns (IDResponse)
 
 	@doc "通过好友申请"
 	@handler AcceptFriendRequest

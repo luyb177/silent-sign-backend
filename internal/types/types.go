@@ -149,6 +149,8 @@ type ListFriendsResp struct {
 type ListMessagesReq struct {
 	PageSize  uint32 `form:"page_size"`
 	PageToken string `form:"page_token,optional"`
+	PartnerID uint64 `form:"partner_id,optional"` // 对话方用户ID，筛选两人之间的私聊记录
+	Type      uint8  `form:"type,optional"`       // 消息类型筛选，0=全部
 }
 
 type ListMessagesResp struct {

@@ -756,7 +756,12 @@
           "200": {
             "description": "",
             "schema": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
@@ -943,7 +948,7 @@
         "tags": [
           "消息模块"
         ],
-        "summary": "消息列表",
+        "summary": "消息列表（支持按聊天对象/类型筛选历史记录）",
         "operationId": "messageListMessages",
         "parameters": [
           {
@@ -955,6 +960,20 @@
           {
             "type": "string",
             "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "对话方用户ID，筛选两人之间的私聊记录",
+            "name": "partner_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "消息类型筛选，0=全部",
+            "name": "type",
             "in": "query",
             "allowEmptyValue": true
           }
@@ -1613,7 +1632,7 @@
       }
     }
   },
-  "x-date": "2026-06-07 16:36:27",
+  "x-date": "2026-06-07 17:16:23",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

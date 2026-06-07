@@ -146,7 +146,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
 			[]rest.Route{
 				{
-					// 消息列表
+					// 消息列表（支持按聊天对象/类型筛选历史记录）
 					Method:  http.MethodGet,
 					Path:    "/list",
 					Handler: message.ListMessagesHandler(serverCtx),

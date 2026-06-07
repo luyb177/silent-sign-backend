@@ -32,16 +32,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: auth.LoginHandler(serverCtx),
 				},
 				{
-					// 注册账号
-					Method:  http.MethodPost,
-					Path:    "/register",
-					Handler: auth.RegisterHandler(serverCtx),
-				},
-				{
 					// 刷新令牌
 					Method:  http.MethodPost,
 					Path:    "/refresh",
 					Handler: auth.RefreshTokenHandler(serverCtx),
+				},
+				{
+					// 注册账号
+					Method:  http.MethodPost,
+					Path:    "/register",
+					Handler: auth.RegisterHandler(serverCtx),
 				},
 				{
 					// 发送验证码

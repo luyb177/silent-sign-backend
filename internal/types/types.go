@@ -96,6 +96,10 @@ type HandleFriendRequestReq struct {
 	RequestID uint64 `json:"request_id"`
 }
 
+type IDResponse struct {
+	ID uint64 `json:"id"`
+}
+
 type IPLocation struct {
 	IP       string `json:"ip"`
 	Country  string `json:"country"`
@@ -176,15 +180,6 @@ type LoginResp struct {
 	UserInfo     UserInfo `json:"user_info"`
 }
 
-type RefreshTokenReq struct {
-	RefreshToken string `json:"refresh_token"`
-}
-
-type RefreshTokenResp struct {
-	Token        string `json:"token"`
-	RefreshToken string `json:"refresh_token"`
-}
-
 type MarkReadReq struct {
 	MessageIDs []uint64 `json:"message_ids"`
 }
@@ -227,6 +222,15 @@ type PageToken struct {
 	ID        uint64 `json:"id"`
 	CreatedAt string `json:"created_at"` // 默认最新
 	SortType  uint8  `json:"sort_type"`  // 1. 最新
+}
+
+type RefreshTokenReq struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshTokenResp struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type RegisterReq struct {

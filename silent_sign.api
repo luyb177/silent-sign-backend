@@ -45,6 +45,9 @@ type (
 // response
 type (
 	Response  {}
+	IDResponse {
+		ID uint64 `json:"id"`
+	}
 )
 
 // ══════════════════════════════════════════════
@@ -209,7 +212,7 @@ type (
 service silent_sign {
 	@doc "创建动态"
 	@handler CreateMoment
-	post /create (CreateMomentReq) returns (Response)
+	post /create (CreateMomentReq) returns (IDResponse)
 
 	@doc "删除动态"
 	@handler DeleteMoment

@@ -1,0 +1,34 @@
+Name: silent_sign
+Host: 0.0.0.0
+Port: 8888
+
+Log:
+  ServiceName: silent-sign
+  Mode: console
+  Encoding: plain
+  Level: info
+  Stat: true
+
+MySQLConf:
+  # 替换 <your-server-ip> 和 <your-db-password>
+  DSN: root:<your-db-password>@tcp(<your-server-ip>:3306)/silent_sign?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai&timeout=10s&readTimeout=30s&writeTimeout=30s
+
+RedisConf:
+  Addr: <your-server-ip>:6379
+  Password: "<your-redis-password>"
+  DB: 0
+
+EmailConf:
+  From: <your-email@qq.com>
+  Password: "<your-smtp-auth-code>"
+  SMTPHost: smtp.qq.com
+  SMTPPort: 465
+
+IP2RegionConf:
+  V4: data/ip2region_v4.xdb
+  V6: data/ip2region_v6.xdb
+
+JWTConf:
+  Secret: "<your-jwt-secret>"
+  ExpireS: 900             # access token 15min
+  RefreshExpireS: 604800   # refresh token 7d

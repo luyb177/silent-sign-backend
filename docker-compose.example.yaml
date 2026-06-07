@@ -1,0 +1,91 @@
+services:
+  # ================= REDIS =================
+  redis:
+    image: redis:7.2
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf:/etc/redis/redis.conf
+    command: ["redis-server", "/etc/redis/redis.conf"]
+
+  # ================= MYSQL =================
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "<your-db-password>"
+    ports:
+      - "3306:3306"
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./mysql/mysql-data:/var/lib/mysql
+
+  # ================= KAFKA =================
+  kafka:
+    image: apache/kafka:3.7.0
+    restart: unless-stopped
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # 双监听（关键）
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9093,CONTROLLER://:9094
+
+      # 内网 + 外网（替换 <your-server-ip> 为实际公网 IP）
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://<your-server-ip>:9093
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9094
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+    volumes:
+      - ./kafka/kafka-data:/var/lib/kafka/data
+
+  # ================= SILENT-SIGN API =================
+  silent-sign-api:
+    image: <your-acr-registry>/silent-sign:latest
+    pull_policy: always
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./service/silent-sign/etc:/app/etc:ro
+      - ./service/silent-sign/data:/app/data:ro
+    depends_on:
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  # ================= SILENT-SIGN CRON =================
+  silent-sign-cron:
+    image: <your-acr-registry>/silent-sign:latest
+    pull_policy: always
+    restart: unless-stopped
+    command: ["./cron", "sync_like", "--daemon", "--interval=60s", "--config", "etc/silent_sign.yaml"]
+    volumes:
+      - ./service/silent-sign/etc:/app/etc:ro
+      - ./service/silent-sign/data:/app/data:ro
+    depends_on:
+      mysql:
+        condition: service_started
+      redis:
+        condition: service_started
+
+networks:
+  default:
+    driver: bridge

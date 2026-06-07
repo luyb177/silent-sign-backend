@@ -37,7 +37,8 @@ Thumbs.db
 **/logs
 
 # Docker
-.dockerignore
+.dockerignored
+docker-compose.yaml
 
 # Environment files
 .env

@@ -288,7 +288,7 @@ type (
 service silent_sign {
 	@doc "创建评论"
 	@handler CreateComment
-	post /create (CreateCommentReq) returns (Response)
+	post /create (CreateCommentReq) returns (IDResponse)
 
 	@doc "删除评论"
 	@handler DeleteComment

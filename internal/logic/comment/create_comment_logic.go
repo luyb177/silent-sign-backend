@@ -34,7 +34,7 @@ func NewCreateCommentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
-func (l *CreateCommentLogic) CreateComment(req *types.CreateCommentReq) (resp *types.Response, err error) {
+func (l *CreateCommentLogic) CreateComment(req *types.CreateCommentReq) (resp *types.IDResponse, err error) {
 	// 1. 参数校验
 	if err = l.validReq(req); err != nil {
 		return nil, err
@@ -76,7 +76,9 @@ func (l *CreateCommentLogic) CreateComment(req *types.CreateCommentReq) (resp *t
 		return nil, errorx.WrapDBInsert("创建评论失败", err)
 	}
 
-	return &types.Response{}, nil
+	return &types.IDResponse{
+		ID: c.ID,
+	}, nil
 }
 
 // validateParent 校验父评论存在且属于同一目标

@@ -11,6 +11,7 @@ import (
 	"github.com/luyb177/silent-sign-backend/internal/constvar"
 	"github.com/luyb177/silent-sign-backend/internal/middleware"
 	"github.com/luyb177/silent-sign-backend/internal/pkg/pagetoken"
+	messageRepo "github.com/luyb177/silent-sign-backend/internal/repo/message"
 	"github.com/luyb177/silent-sign-backend/internal/svc"
 	"github.com/luyb177/silent-sign-backend/internal/types"
 
@@ -23,7 +24,7 @@ type ListMessagesLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// ListMessagesLogic 消息列表
+// ListMessagesLogic 消息列表（支持按聊天对象/类型筛选历史记录）
 func NewListMessagesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListMessagesLogic {
 	return &ListMessagesLogic{
 		Logger: logx.WithContext(ctx),
@@ -55,7 +56,13 @@ func (l *ListMessagesLogic) ListMessages(req *types.ListMessagesReq) (resp *type
 	}
 
 	// 4. 查询消息列表
-	messages, err := l.svcCtx.Repos.Message.ListByReceiver(l.ctx, authUser.UserID, pt.ID, limit)
+	// 如果指定了 PartnerID，查询两人之间的聊天记录；否则查询所有发给当前用户的消息
+	var messages []*messageRepo.Message
+	if req.PartnerID != 0 {
+		messages, err = l.svcCtx.Repos.Message.ListByPartner(l.ctx, authUser.UserID, req.PartnerID, req.Type, pt.ID, limit)
+	} else {
+		messages, err = l.svcCtx.Repos.Message.ListByReceiver(l.ctx, authUser.UserID, pt.ID, limit)
+	}
 	if err != nil {
 		l.Errorf("list messages failed: %v", err)
 		return nil, errorx.WrapDBQuery("查询消息列表失败", err)

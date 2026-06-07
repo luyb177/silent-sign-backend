@@ -34,7 +34,7 @@ func NewSendFriendRequestLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 	}
 }
 
-func (l *SendFriendRequestLogic) SendFriendRequest(req *types.SendFriendRequestReq) (resp *types.Response, err error) {
+func (l *SendFriendRequestLogic) SendFriendRequest(req *types.SendFriendRequestReq) (resp *types.IDResponse, err error) {
 	// 1. 获取当前用户
 	authUser := middleware.GetAuthUser(l.ctx)
 	if authUser == nil {
@@ -74,12 +74,13 @@ func (l *SendFriendRequestLogic) SendFriendRequest(req *types.SendFriendRequestR
 	}
 
 	// 6. 事务内：创建申请 + 发消息通知
+	fr := &friendrequestRepo.FriendRequest{
+		FromUserID: authUser.UserID,
+		ToUserID:   req.ToUserID,
+		Status:     constvar.FriendRequestStatusPending,
+	}
+
 	err = l.svcCtx.Repos.Transaction(func(tx *gorm.DB) error {
-		fr := &friendrequestRepo.FriendRequest{
-			FromUserID: authUser.UserID,
-			ToUserID:   req.ToUserID,
-			Status:     constvar.FriendRequestStatusPending,
-		}
 		if err := l.svcCtx.Repos.FriendRequest.Create(l.ctx, fr, tx); err != nil {
 			return err
 		}
@@ -104,5 +105,7 @@ func (l *SendFriendRequestLogic) SendFriendRequest(req *types.SendFriendRequestR
 	})
 	l.svcCtx.SSEHub.PushToUser(req.ToUserID, event)
 
-	return &types.Response{}, nil
+	return &types.IDResponse{
+		ID: fr.ID,
+	}, nil
 }

@@ -96,6 +96,10 @@ type HandleFriendRequestReq struct {
 	RequestID uint64 `json:"request_id"`
 }
 
+type IDResponse struct {
+	ID uint64 `json:"id"`
+}
+
 type IPLocation struct {
 	IP       string `json:"ip"`
 	Country  string `json:"country"`
@@ -122,6 +126,7 @@ type ListCommentsResp struct {
 type ListFriendRequestsReq struct {
 	PageSize  uint32 `form:"page_size"`
 	PageToken string `form:"page_token,optional"`
+	Status    uint8  `form:"status,optional"` // 筛选状态：0=全部，1=pending，2=accepted，3=rejected
 }
 
 type ListFriendRequestsResp struct {
@@ -144,6 +149,8 @@ type ListFriendsResp struct {
 type ListMessagesReq struct {
 	PageSize  uint32 `form:"page_size"`
 	PageToken string `form:"page_token,optional"`
+	PartnerID uint64 `form:"partner_id,optional"` // 对话方用户ID，筛选两人之间的私聊记录
+	Type      uint8  `form:"type,optional"`       // 消息类型筛选，0=全部
 }
 
 type ListMessagesResp struct {
@@ -171,8 +178,9 @@ type LoginReq struct {
 }
 
 type LoginResp struct {
-	Token    string   `json:"token"`
-	UserInfo UserInfo `json:"user_info"`
+	Token        string   `json:"token"`
+	RefreshToken string   `json:"refresh_token"`
+	UserInfo     UserInfo `json:"user_info"`
 }
 
 type MarkReadReq struct {
@@ -217,6 +225,15 @@ type PageToken struct {
 	ID        uint64 `json:"id"`
 	CreatedAt string `json:"created_at"` // 默认最新
 	SortType  uint8  `json:"sort_type"`  // 1. 最新
+}
+
+type RefreshTokenReq struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshTokenResp struct {
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type RegisterReq struct {

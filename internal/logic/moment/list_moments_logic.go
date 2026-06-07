@@ -69,7 +69,7 @@ func (l *ListMomentsLogic) ListMoments(req *types.ListMomentsReq) (resp *types.L
 		}
 		if pt.CreatedAt != "" {
 			var parseErr error
-			cursorTime, parseErr = time.Parse(time.DateTime, pt.CreatedAt)
+			cursorTime, parseErr = time.ParseInLocation(time.DateTime, pt.CreatedAt, constvar.TimeLocation)
 			if parseErr != nil {
 				return nil, errorx.WrapBadRequest("分页参数无效", parseErr)
 			}

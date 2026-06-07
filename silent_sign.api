@@ -45,6 +45,9 @@ type (
 // response
 type (
 	Response  {}
+	IDResponse {
+		ID uint64 `json:"id"`
+	}
 )
 
 // ══════════════════════════════════════════════
@@ -68,13 +71,21 @@ type (
 		Channel  int32  `json:"channel"` // 1: email, 2: phone
 		Password string `json:"password"` // 密码
 	}
+	RefreshTokenReq {
+		RefreshToken string `json:"refresh_token"`
+	}
 )
 
 // response
 type (
 	LoginResp {
-		Token    string   `json:"token"`
-		UserInfo UserInfo `json:"user_info"`
+		Token        string   `json:"token"`
+		RefreshToken string   `json:"refresh_token"`
+		UserInfo     UserInfo `json:"user_info"`
+	}
+	RefreshTokenResp {
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 )
 
@@ -96,6 +107,10 @@ service silent_sign {
 	@doc "登录账号"
 	@handler Login
 	post /login (LoginReq) returns (LoginResp)
+
+	@doc "刷新令牌"
+	@handler RefreshToken
+	post /refresh (RefreshTokenReq) returns (RefreshTokenResp)
 }
 
 // ══════════════════════════════════════════════
@@ -197,7 +212,7 @@ type (
 service silent_sign {
 	@doc "创建动态"
 	@handler CreateMoment
-	post /create (CreateMomentReq) returns (Response)
+	post /create (CreateMomentReq) returns (IDResponse)
 
 	@doc "删除动态"
 	@handler DeleteMoment
@@ -273,7 +288,7 @@ type (
 service silent_sign {
 	@doc "创建评论"
 	@handler CreateComment
-	post /create (CreateCommentReq) returns (Response)
+	post /create (CreateCommentReq) returns (IDResponse)
 
 	@doc "删除评论"
 	@handler DeleteComment
@@ -343,6 +358,8 @@ type (
 	ListMessagesReq {
 		PageSize  uint32 `form:"page_size"`
 		PageToken string `form:"page_token,optional"`
+		PartnerID uint64 `form:"partner_id,optional"` // 对话方用户ID，筛选两人之间的私聊记录
+		Type      uint8  `form:"type,optional"` // 消息类型筛选，0=全部
 	}
 	MarkReadReq {
 		MessageIDs []uint64 `json:"message_ids"`
@@ -372,7 +389,7 @@ service silent_sign {
 	@handler SendMessage
 	post /send (SendMessageReq) returns (Response)
 
-	@doc "消息列表"
+	@doc "消息列表（支持按聊天对象/类型筛选历史记录）"
 	@handler ListMessages
 	get /list (ListMessagesReq) returns (ListMessagesResp)
 
@@ -441,6 +458,7 @@ type (
 	ListFriendRequestsReq {
 		PageSize  uint32 `form:"page_size"`
 		PageToken string `form:"page_token,optional"`
+		Status    uint8  `form:"status,optional"` // 筛选状态：0=全部，1=pending，2=accepted，3=rejected
 	}
 	ListFriendsReq {
 		PageSize  uint32 `form:"page_size"`
@@ -471,7 +489,7 @@ type (
 service silent_sign {
 	@doc "发送好友申请"
 	@handler SendFriendRequest
-	post /request (SendFriendRequestReq) returns (Response)
+	post /request (SendFriendRequestReq) returns (IDResponse)
 
 	@doc "通过好友申请"
 	@handler AcceptFriendRequest
@@ -485,7 +503,7 @@ service silent_sign {
 	@handler DeleteFriend
 	post /delete (DeleteFriendReq) returns (Response)
 
-	@doc "待处理申请列表"
+	@doc "好友申请列表（支持按状态筛选，不传则返回全部）"
 	@handler ListFriendRequests
 	get /requests (ListFriendRequestsReq) returns (ListFriendRequestsResp)
 

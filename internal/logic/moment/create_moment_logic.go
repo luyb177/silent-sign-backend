@@ -33,7 +33,7 @@ func NewCreateMomentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Crea
 	}
 }
 
-func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *types.Response, err error) {
+func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *types.IDResponse, err error) {
 	// 1. 参数校验
 	if err := l.validReq(req); err != nil {
 		return nil, err
@@ -72,7 +72,9 @@ func (l *CreateMomentLogic) CreateMoment(req *types.CreateMomentReq) (resp *type
 		}
 	}
 
-	return &types.Response{}, nil
+	return &types.IDResponse{
+		ID: m.ID,
+	}, nil
 }
 
 func (l *CreateMomentLogic) createImages(momentID uint64, urls []string) error {

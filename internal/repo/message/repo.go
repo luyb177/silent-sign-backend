@@ -14,6 +14,8 @@ type Repository interface {
 	Create(ctx context.Context, m *Message, tx ...*gorm.DB) error
 	FindByID(ctx context.Context, id uint64, tx ...*gorm.DB) (*Message, error)
 	ListByReceiver(ctx context.Context, receiverID uint64, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Message, error)
+	// ListByPartner 查询两人之间的私聊消息（双向，按时间倒序游标分页），msgType=0 不过滤类型
+	ListByPartner(ctx context.Context, userID, partnerID uint64, msgType uint8, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Message, error)
 	MarkRead(ctx context.Context, receiverID uint64, messageIDs []uint64, tx ...*gorm.DB) error
 	UnreadCount(ctx context.Context, receiverID uint64, tx ...*gorm.DB) (int64, error)
 
@@ -58,6 +60,26 @@ func (r *repo) ListByReceiver(ctx context.Context, receiverID uint64, cursorID u
 	var messages []*Message
 
 	query := db.Where("receiver_id = ?", receiverID)
+	if cursorID != 0 {
+		query = query.Where("id < ?", cursorID)
+	}
+	err := query.Order("id DESC").Limit(limit).Find(&messages).Error
+	return messages, err
+}
+
+// ListByPartner 查询两人之间的私聊消息（双向筛选，按时间倒序游标分页）
+// msgType=0 表示不过滤类型
+func (r *repo) ListByPartner(ctx context.Context, userID, partnerID uint64, msgType uint8, cursorID uint64, limit int, tx ...*gorm.DB) ([]*Message, error) {
+	db := r.getDB(ctx, tx...)
+	var messages []*Message
+
+	query := db.Where(
+		"(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)",
+		userID, partnerID, partnerID, userID,
+	)
+	if msgType != 0 {
+		query = query.Where("type = ?", msgType)
+	}
 	if cursorID != 0 {
 		query = query.Where("id < ?", cursorID)
 	}

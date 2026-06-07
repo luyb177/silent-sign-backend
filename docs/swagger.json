@@ -15,8 +15,213 @@
   },
   "basePath": "/",
   "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "认证模块"
+        ],
+        "summary": "登录账号",
+        "operationId": "authLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "target",
+                "channel",
+                "password"
+              ],
+              "properties": {
+                "channel": {
+                  "description": "1: email, 2: phone",
+                  "type": "integer"
+                },
+                "password": {
+                  "description": "密码",
+                  "type": "string"
+                },
+                "target": {
+                  "description": "email or phone",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                },
+                "user_info": {
+                  "type": "object",
+                  "required": [
+                    "user_id",
+                    "username",
+                    "email",
+                    "avatar",
+                    "created_at"
+                  ],
+                  "properties": {
+                    "avatar": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "user_id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "认证模块"
+        ],
+        "summary": "刷新令牌",
+        "operationId": "authRefreshToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "refresh_token"
+              ],
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "认证模块"
+        ],
+        "summary": "注册账号",
+        "operationId": "authRegister",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "target",
+                "channel",
+                "code",
+                "password"
+              ],
+              "properties": {
+                "channel": {
+                  "description": "1: email, 2: phone",
+                  "type": "integer"
+                },
+                "code": {
+                  "description": "验证码",
+                  "type": "string"
+                },
+                "password": {
+                  "description": "密码",
+                  "type": "string"
+                },
+                "target": {
+                  "description": "email or phone",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/send_code": {
-      "get": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
         "produces": [
           "application/json"
         ],
@@ -61,13 +266,235 @@
           "200": {
             "description": "",
             "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comment/create": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论模块"
+        ],
+        "summary": "创建评论",
+        "operationId": "commentCreateComment",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
               "type": "object",
+              "required": [
+                "target_type",
+                "target_id",
+                "content"
+              ],
               "properties": {
-                "Code": {
+                "content": {
+                  "type": "string"
+                },
+                "father_id": {
                   "type": "integer"
                 },
-                "Data": {},
-                "Msg": {
+                "target_id": {
+                  "type": "integer"
+                },
+                "target_type": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comment/delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论模块"
+        ],
+        "summary": "删除评论",
+        "operationId": "commentDeleteComment",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "comment_id"
+              ],
+              "properties": {
+                "comment_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comment/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论模块"
+        ],
+        "summary": "分页获取评论列表",
+        "operationId": "commentListComments",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "target_type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "target_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "0=父评论列表, \u003e0=子评论列表",
+            "name": "father_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "comments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "comment_id",
+                      "created_at",
+                      "father_id",
+                      "creator",
+                      "location",
+                      "content",
+                      "like_num",
+                      "sub_num",
+                      "is_liked"
+                    ],
+                    "properties": {
+                      "comment_id": {
+                        "type": "integer"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "creator": {
+                        "type": "object",
+                        "required": [
+                          "user_id",
+                          "name",
+                          "avatar"
+                        ],
+                        "properties": {
+                          "avatar": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "father_id": {
+                        "description": "父评论ID，0表示一级评论",
+                        "type": "integer"
+                      },
+                      "is_liked": {
+                        "type": "boolean"
+                      },
+                      "like_num": {
+                        "type": "integer"
+                      },
+                      "location": {
+                        "type": "string"
+                      },
+                      "sub_num": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean"
+                },
+                "page_token": {
                   "type": "string"
                 }
               }
@@ -75,9 +502,1137 @@
           }
         }
       }
+    },
+    "/api/v1/friend/accept": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "好友模块"
+        ],
+        "summary": "通过好友申请",
+        "operationId": "friendAcceptFriendRequest",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "request_id"
+              ],
+              "properties": {
+                "request_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/friend/delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "好友模块"
+        ],
+        "summary": "删除好友",
+        "operationId": "friendDeleteFriend",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "friend_id"
+              ],
+              "properties": {
+                "friend_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/friend/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "好友模块"
+        ],
+        "summary": "好友列表",
+        "operationId": "friendListFriends",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "friends": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "friend_id",
+                      "created_at",
+                      "user"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "friend_id": {
+                        "type": "integer"
+                      },
+                      "user": {
+                        "type": "object",
+                        "required": [
+                          "user_id",
+                          "name",
+                          "avatar"
+                        ],
+                        "properties": {
+                          "avatar": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "has_more": {
+                  "type": "boolean"
+                },
+                "page_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/friend/reject": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "好友模块"
+        ],
+        "summary": "拒绝好友申请",
+        "operationId": "friendRejectFriendRequest",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "request_id"
+              ],
+              "properties": {
+                "request_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/friend/request": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "好友模块"
+        ],
+        "summary": "发送好友申请",
+        "operationId": "friendSendFriendRequest",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "to_user_id"
+              ],
+              "properties": {
+                "to_user_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/friend/requests": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "好友模块"
+        ],
+        "summary": "好友申请列表（支持按状态筛选，不传则返回全部）",
+        "operationId": "friendListFriendRequests",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "筛选状态：0=全部，1=pending，2=accepted，3=rejected",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "has_more": {
+                  "type": "boolean"
+                },
+                "page_token": {
+                  "type": "string"
+                },
+                "requests": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "request_id",
+                      "created_at",
+                      "from_user",
+                      "to_user",
+                      "status"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "from_user": {
+                        "type": "object",
+                        "required": [
+                          "user_id",
+                          "name",
+                          "avatar"
+                        ],
+                        "properties": {
+                          "avatar": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "request_id": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "type": "integer"
+                      },
+                      "to_user": {
+                        "type": "object",
+                        "required": [
+                          "user_id",
+                          "name",
+                          "avatar"
+                        ],
+                        "properties": {
+                          "avatar": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/like/toggle": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "点赞模块"
+        ],
+        "summary": "点赞/取消点赞",
+        "operationId": "likeToggleLike",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "target_type",
+                "target_id"
+              ],
+              "properties": {
+                "target_id": {
+                  "type": "integer"
+                },
+                "target_type": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "like_num": {
+                  "type": "integer"
+                },
+                "liked": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/message/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "消息模块"
+        ],
+        "summary": "消息列表（支持按聊天对象/类型筛选历史记录）",
+        "operationId": "messageListMessages",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "对话方用户ID，筛选两人之间的私聊记录",
+            "name": "partner_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "description": "消息类型筛选，0=全部",
+            "name": "type",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "has_more": {
+                  "type": "boolean"
+                },
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "message_id",
+                      "created_at",
+                      "creator",
+                      "type",
+                      "content",
+                      "is_read"
+                    ],
+                    "properties": {
+                      "content": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "creator": {
+                        "type": "object",
+                        "required": [
+                          "user_id",
+                          "name",
+                          "avatar"
+                        ],
+                        "properties": {
+                          "avatar": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "is_read": {
+                        "type": "boolean"
+                      },
+                      "message_id": {
+                        "type": "integer"
+                      },
+                      "type": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/message/read": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "消息模块"
+        ],
+        "summary": "标记已读",
+        "operationId": "messageMarkRead",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "message_ids"
+              ],
+              "properties": {
+                "message_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/message/send": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "消息模块"
+        ],
+        "summary": "发送消息",
+        "operationId": "messageSendMessage",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "receiver_id",
+                "type",
+                "content"
+              ],
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "receiver_id": {
+                  "type": "integer"
+                },
+                "type": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/message/unread_count": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "消息模块"
+        ],
+        "summary": "未读消息数",
+        "operationId": "messageUnreadCount",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/moment/create": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "动态模块"
+        ],
+        "summary": "创建动态",
+        "operationId": "momentCreateMoment",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "image_urls": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "type": {
+                  "type": "integer"
+                },
+                "video_url": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/moment/delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "动态模块"
+        ],
+        "summary": "删除动态",
+        "operationId": "momentDeleteMoment",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "moment_id"
+              ],
+              "properties": {
+                "moment_id": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/moment/get": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "动态模块"
+        ],
+        "summary": "获取动态详情",
+        "operationId": "momentGetMoment",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "moment_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "moment": {
+                  "type": "object",
+                  "required": [
+                    "moment_id",
+                    "created_at",
+                    "updated_at",
+                    "creator",
+                    "type",
+                    "like_num",
+                    "comment_num",
+                    "share_num",
+                    "view_num",
+                    "is_liked"
+                  ],
+                  "properties": {
+                    "comment_num": {
+                      "type": "integer"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "creator": {
+                      "type": "object",
+                      "required": [
+                        "user_id",
+                        "name",
+                        "avatar"
+                      ],
+                      "properties": {
+                        "avatar": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "image_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "is_liked": {
+                      "type": "boolean"
+                    },
+                    "like_num": {
+                      "type": "integer"
+                    },
+                    "moment_id": {
+                      "type": "integer"
+                    },
+                    "share_num": {
+                      "type": "integer"
+                    },
+                    "type": {
+                      "type": "integer"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "video_url": {
+                      "type": "string"
+                    },
+                    "view_num": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/moment/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "动态模块"
+        ],
+        "summary": "分页获取动态列表",
+        "operationId": "momentListMoments",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "name": "sort_type",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "page_token",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "has_more": {
+                  "type": "boolean"
+                },
+                "moments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "moment_id",
+                      "created_at",
+                      "updated_at",
+                      "creator",
+                      "type",
+                      "like_num",
+                      "comment_num",
+                      "share_num",
+                      "view_num",
+                      "is_liked"
+                    ],
+                    "properties": {
+                      "comment_num": {
+                        "type": "integer"
+                      },
+                      "content": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "creator": {
+                        "type": "object",
+                        "required": [
+                          "user_id",
+                          "name",
+                          "avatar"
+                        ],
+                        "properties": {
+                          "avatar": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "user_id": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "image_urls": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "is_liked": {
+                        "type": "boolean"
+                      },
+                      "like_num": {
+                        "type": "integer"
+                      },
+                      "moment_id": {
+                        "type": "integer"
+                      },
+                      "share_num": {
+                        "type": "integer"
+                      },
+                      "type": {
+                        "type": "integer"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "video_url": {
+                        "type": "string"
+                      },
+                      "view_num": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sse/events": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "SSE推送"
+        ],
+        "summary": "SSE 事件流",
+        "operationId": "sseEvents",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/change_password": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "用户模块"
+        ],
+        "summary": "修改密码",
+        "operationId": "userChangePassword",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "code",
+                "new_password"
+              ],
+              "properties": {
+                "code": {
+                  "description": "验证码",
+                  "type": "string"
+                },
+                "new_password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user/update_info": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "用户模块"
+        ],
+        "summary": "修改用户信息",
+        "operationId": "userUpdateUserInfo",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "avatar": {
+                  "type": "string"
+                },
+                "username": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
     }
   },
-  "x-date": "2026-05-31 18:56:10",
+  "x-date": "2026-06-07 17:16:23",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

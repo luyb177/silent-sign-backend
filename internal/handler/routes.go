@@ -32,6 +32,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: auth.LoginHandler(serverCtx),
 				},
 				{
+					// 刷新令牌
+					Method:  http.MethodPost,
+					Path:    "/refresh",
+					Handler: auth.RefreshTokenHandler(serverCtx),
+				},
+				{
 					// 注册账号
 					Method:  http.MethodPost,
 					Path:    "/register",
@@ -110,7 +116,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: friend.SendFriendRequestHandler(serverCtx),
 				},
 				{
-					// 待处理申请列表
+					// 好友申请列表（支持按状态筛选，不传则返回全部）
 					Method:  http.MethodGet,
 					Path:    "/requests",
 					Handler: friend.ListFriendRequestsHandler(serverCtx),
@@ -140,7 +146,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.JWTMiddleware, serverCtx.IPMiddleware},
 			[]rest.Route{
 				{
-					// 消息列表
+					// 消息列表（支持按聊天对象/类型筛选历史记录）
 					Method:  http.MethodGet,
 					Path:    "/list",
 					Handler: message.ListMessagesHandler(serverCtx),

@@ -53,7 +53,14 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
-	jwtHandler := jwtx.NewHandler(c.JWTConf.Secret, time.Duration(c.JWTConf.ExpireS)*time.Second)
+	jwtHandler, err := jwtx.NewHandler(
+		c.JWTConf.Secret,
+		time.Duration(c.JWTConf.ExpireS)*time.Second,
+		time.Duration(c.JWTConf.RefreshExpireS)*time.Second,
+	)
+	if err != nil {
+		panic(err)
+	}
 
 	return &ServiceContext{
 		Config:        c,

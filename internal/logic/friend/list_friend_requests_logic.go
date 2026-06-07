@@ -23,7 +23,7 @@ type ListFriendRequestsLogic struct {
 	svcCtx *svc.ServiceContext
 }
 
-// ListFriendRequestsLogic 待处理申请列表
+// ListFriendRequestsLogic 好友申请列表（支持按状态筛选）
 func NewListFriendRequestsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListFriendRequestsLogic {
 	return &ListFriendRequestsLogic{
 		Logger: logx.WithContext(ctx),
@@ -54,8 +54,8 @@ func (l *ListFriendRequestsLogic) ListFriendRequests(req *types.ListFriendReques
 		}
 	}
 
-	// 4. 查询
-	requests, err := l.svcCtx.Repos.FriendRequest.ListPendingToUser(l.ctx, authUser.UserID, limit, pt.ID)
+	// 4. 查询（按状态筛选，0 表示全部）
+	requests, err := l.svcCtx.Repos.FriendRequest.ListToUser(l.ctx, authUser.UserID, req.Status, limit, pt.ID)
 	if err != nil {
 		l.Errorf("list friend requests failed: %v", err)
 		return nil, errorx.WrapDBQuery("查询好友申请失败", err)

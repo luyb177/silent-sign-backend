@@ -6,6 +6,7 @@ package message
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/luyb177/silent-sign-backend/common/errorx"
 	"github.com/luyb177/silent-sign-backend/internal/middleware"
@@ -59,13 +60,24 @@ func (l *SendMessageLogic) SendMessage(req *types.SendMessageReq) (resp *types.R
 		return nil, errorx.WrapDBInsert("发送消息失败", err)
 	}
 
-	// 4. SSE 推送通知
+	// 4. 推送消息
+	// 4a. SSE 通知（离线/后台也能收到）
 	event, _ := json.Marshal(map[string]interface{}{
 		"type":       "new_message",
 		"message_id": m.ID,
 		"msg_type":   req.Type,
 	})
 	l.svcCtx.SSEHub.PushToUser(req.ReceiverID, event)
+
+	// 4b. WebSocket 推送（在线用户实时收到完整消息）
+	wsData, _ := json.Marshal(map[string]interface{}{
+		"type":         "chat",
+		"message_id":   m.ID,
+		"from_user_id": authUser.UserID,
+		"content":      req.Content,
+		"created_at":   m.CreatedAt.Format(time.DateTime),
+	})
+	l.svcCtx.WSHub.SendToUser(req.ReceiverID, wsData)
 
 	return &types.Response{}, nil
 }

@@ -57,7 +57,7 @@ func (l *ListCommentsLogic) ListComments(req *types.ListCommentsReq) (resp *type
 	if req.FatherID == 0 {
 		cursorTime := time.Time{}
 		if pt.CreatedAt != "" {
-			cursorTime, _ = time.Parse(time.DateTime, pt.CreatedAt)
+			cursorTime, _ = time.ParseInLocation(time.DateTime, pt.CreatedAt, constvar.TimeLocation)
 		}
 		comments, err = l.svcCtx.Repos.Comment.ListByHot(
 			l.ctx, req.TargetType, req.TargetID,
@@ -70,7 +70,7 @@ func (l *ListCommentsLogic) ListComments(req *types.ListCommentsReq) (resp *type
 		}
 		if pt.CreatedAt != "" {
 			var parseErr error
-			cursorTime, parseErr = time.Parse(time.DateTime, pt.CreatedAt)
+			cursorTime, parseErr = time.ParseInLocation(time.DateTime, pt.CreatedAt, constvar.TimeLocation)
 			if parseErr != nil {
 				return nil, errorx.WrapBadRequest("分页参数无效", parseErr)
 			}
